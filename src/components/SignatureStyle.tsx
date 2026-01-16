@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { motion, cubicBezier, AnimatePresence } from 'framer-motion';
-
+import { cn } from '@/lib/utils';
 type SignatureContent = {
   tagline: string | null;
   title_line_1: string | null;
