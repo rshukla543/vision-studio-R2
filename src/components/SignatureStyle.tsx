@@ -90,7 +90,7 @@ export function SignatureStyle() {
             // whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 1.8, ease: LUXURY_EASE }}
-            className="order-first lg:order-last w-full"
+            className="order-last lg:order-last w-full"
           >
             <div className="relative aspect-square max-w-[300px] md:max-w-[520px] flex items-center justify-center mx-auto">
               {/* Animated Rings */}
