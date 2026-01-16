@@ -17,10 +17,6 @@ import { useEffect } from "react";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // ← Now useEffect is correctly inside the component
-  useEffect(() => {
-    testConnection();
-  }, []); // Empty dependency array = run once on mount
 
   return (
   <QueryClientProvider client={queryClient}>
