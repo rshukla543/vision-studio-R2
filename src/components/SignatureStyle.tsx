@@ -96,7 +96,7 @@ export function SignatureStyle() {
             initial={{ opacity: 0, scale: 1.08 }}
             animate={isImageInView ? { opacity: 1, scale: 1 } : {}}
             transition={{
-              duration: 2.8,            // slow cinematic zoom
+              duration: 3.0,            // slow cinematic zoom
               ease: LUXURY_EASE,
             }}
             className="order-last lg:order-last w-full"
