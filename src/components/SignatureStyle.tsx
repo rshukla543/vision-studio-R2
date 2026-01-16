@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { motion, cubicBezier, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, cubicBezier } from 'framer-motion';
 import { cn } from '@/lib/utils';
+
 type SignatureContent = {
   tagline: string | null;
   title_line_1: string | null;
@@ -15,16 +16,17 @@ type SignatureContent = {
   stat_3_value: string | null;
   stat_3_label: string | null;
   image_url: string | null;
-  preview_image_url?: string | null; // Make sure this is in your DB
+  preview_image_url?: string | null;
 };
 
-const SMOOTH_EASE = cubicBezier(0.43, 0.13, 0.23, 0.96);
+// Custom "Luxury" easing: starts slow, accelerates, then lands softly
+const LUXURY_EASE = cubicBezier(0.16, 1, 0.3, 1);
 
 export function SignatureStyle() {
   const [content, setContent] = useState<SignatureContent | null>(null);
   const [hiResLoaded, setHiResLoaded] = useState(false);
-  const imageRef = useRef<HTMLImageElement>(null);
-
+  
+  /* ---------------- FETCH DATA ---------------- */
   useEffect(() => {
     let mounted = true;
     const fetchContent = async () => {
@@ -41,121 +43,150 @@ export function SignatureStyle() {
     return () => { mounted = false; };
   }, []);
 
-  // Animation variants optimized for mobile GPU (reduced blur radius and used hardware acceleration)
+  /* ---------------- ANIMATION VARIANTS ---------------- */
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.08, delayChildren: 0.1 }
+      transition: { 
+        staggerChildren: 0.12, 
+        delayChildren: 0.2,
+        ease: LUXURY_EASE 
+      }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 15, filter: "blur(4px)" }, // Reduced blur for performance
+    hidden: { 
+      opacity: 0, 
+      y: 30, 
+      scale: 0.99 
+    },
     visible: { 
       opacity: 1, 
       y: 0, 
-      filter: "blur(0px)",
-      transition: { duration: 0.8, ease: SMOOTH_EASE }
+      scale: 1,
+      transition: { 
+        duration: 1, 
+        ease: LUXURY_EASE 
+      }
     }
   };
 
   return (
     <section className="relative py-20 md:py-40 overflow-hidden bg-[#0a0a0a]">
-      {/* Optimization: Removed the grain overlay on mobile to save GPU fill-rate */}
+      {/* Background Noise - Only for Desktop to save mobile memory */}
       <div className="hidden md:block absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           
-          {/* IMAGE COLUMN with Progressive Loading */}
+          {/* ---------------- IMAGE COLUMN ---------------- */}
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 1 }}
+            initial={{ opacity: 0, scale: 0.92 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 1.4, ease: LUXURY_EASE }}
             className="order-first lg:order-last w-full"
           >
-            <div className="relative aspect-square max-w-[280px] md:max-w-[500px] flex items-center justify-center mx-auto">
-              <div className="absolute w-full h-full border border-white/[0.05] rounded-full" />
+            <div className="relative aspect-square max-w-[300px] md:max-w-[520px] flex items-center justify-center mx-auto">
+              {/* Animated Rings */}
+              <div className="absolute w-full h-full border border-white/[0.05] rounded-full animate-[spin_20s_linear_infinite]" />
+              <div className="absolute w-[92%] h-[92%] border border-primary/10 rounded-full" />
               
-              <div className="relative w-[85%] h-[85%] rounded-full overflow-hidden bg-[#111]">
+              <div className="relative w-[84%] h-[84%] rounded-full overflow-hidden bg-[#111] border border-white/10 shadow-2xl">
                 {content?.image_url && (
                   <>
-                    {/* LOW RES PREVIEW - Always visible until High Res is ready */}
+                    {/* Low-res placeholder */}
                     <img 
                       src={content.preview_image_url || content.image_url} 
                       className={cn(
-                        "absolute inset-0 w-full h-full object-cover blur-lg scale-110 transition-opacity duration-1000",
+                        "absolute inset-0 w-full h-full object-cover blur-md transition-opacity duration-1000",
                         hiResLoaded ? "opacity-0" : "opacity-100"
                       )}
-                      alt="loading..."
+                      alt=""
                     />
-                    
-                    {/* HIGH RES IMAGE */}
+                    {/* High-res image */}
                     <img
-                      ref={imageRef}
                       src={content.image_url}
                       onLoad={() => setHiResLoaded(true)}
+                      decoding="async"
                       className={cn(
-                        "absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 will-change-transform",
-                        hiResLoaded ? "opacity-100" : "opacity-0"
+                        "absolute inset-0 w-full h-full object-cover transition-all duration-1000 will-change-transform",
+                        hiResLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"
                       )}
-                      alt="Signature"
+                      alt="Signature Style"
                     />
                   </>
                 )}
+                <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent" />
               </div>
             </div>
           </motion.div>
 
-          {/* TEXT COLUMN */}
+          {/* ---------------- TEXT COLUMN ---------------- */}
           <div className="w-full">
-            <AnimatePresence>
-              {content && (
+            <AnimatePresence mode="wait">
+              {content ? (
                 <motion.div
+                  key="main-content"
                   variants={containerVariants}
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.1 }}
-                  className="space-y-8 md:space-y-10 text-center lg:text-left"
+                  className="space-y-10 text-center lg:text-left will-change-transform"
                 >
-                  <motion.div variants={itemVariants} className="space-y-4">
-                    <span className="text-[10px] tracking-[0.4em] md:tracking-[0.8em] uppercase text-primary font-bold inline-block border-b border-primary/20 pb-2">
+                  {/* Tagline */}
+                  <motion.div variants={itemVariants}>
+                    <span className="text-[10px] tracking-[0.5em] md:tracking-[0.8em] uppercase text-primary font-bold inline-block border-b border-primary/20 pb-2">
                       {content.tagline}
                     </span>
-                    <h2 className="font-serif text-4xl md:text-8xl font-light text-white leading-tight md:leading-[1.1]">
+                  </motion.div>
+
+                  {/* Title */}
+                  <motion.div variants={itemVariants} className="space-y-2">
+                    <h2 className="font-serif text-5xl md:text-8xl font-light text-white leading-[1.1] tracking-tight">
                       {content.title_line_1}
-                      <span className="block italic text-primary/90 mt-1 md:mt-2">
+                      <span className="block italic text-primary mt-2">
                         {content.title_highlight}
                       </span>
                     </h2>
                   </motion.div>
 
+                  {/* Descriptions */}
                   <motion.div variants={itemVariants} className="space-y-6 max-w-lg mx-auto lg:mx-0">
-                    <p className="text-sm md:text-xl text-white/50 leading-relaxed font-light">
+                    <p className="text-base md:text-xl text-white/50 leading-relaxed font-light">
                       {content.description_1}
                     </p>
-                    {/* Simplified Border logic for mobile */}
-                    <p className="text-white/30 leading-relaxed text-[13px] italic border-l border-primary/20 pl-4 md:pl-6 text-left mx-auto lg:mx-0">
+                    <p className="text-white/30 text-sm italic border-l-2 border-primary/20 pl-6 text-left mx-auto lg:mx-0">
                       {content.description_2}
                     </p>
                   </motion.div>
 
-                  {/* STATS - Using flex-row with better spacing for mobile */}
-                  <motion.div variants={itemVariants} className="flex justify-between md:grid md:grid-cols-3 gap-2 md:gap-12 pt-8 border-t border-white/5">
+                  {/* Stats Bar */}
+                  <motion.div 
+                    variants={itemVariants} 
+                    className="flex justify-between items-center md:grid md:grid-cols-3 gap-4 pt-10 border-t border-white/5"
+                  >
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="text-center lg:text-left">
-                        <span className="block font-serif text-2xl md:text-5xl text-white">
+                      <div key={i} className="text-center lg:text-left group">
+                        <span className="block font-serif text-3xl md:text-5xl text-white group-hover:text-primary transition-colors duration-500">
                           {content[`stat_${i}_value` as keyof SignatureContent]}
                         </span>
-                        <span className="text-[7px] md:text-[10px] tracking-[0.1em] md:tracking-[0.3em] uppercase text-primary/50 font-medium">
+                        <span className="text-[8px] md:text-[10px] tracking-[0.2em] uppercase text-primary/50 font-medium">
                           {content[`stat_${i}_label` as keyof SignatureContent]}
                         </span>
                       </div>
                     ))}
                   </motion.div>
                 </motion.div>
+              ) : (
+                /* Loading State (Skeleton) */
+                <div className="space-y-10 py-10">
+                  <div className="h-4 w-32 bg-white/5 rounded mx-auto lg:mx-0 animate-pulse" />
+                  <div className="h-24 w-full bg-white/5 rounded animate-pulse" />
+                  <div className="h-20 w-full bg-white/5 rounded animate-pulse" />
+                </div>
               )}
             </AnimatePresence>
           </div>
