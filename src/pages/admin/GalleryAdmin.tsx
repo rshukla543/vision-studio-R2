@@ -4,7 +4,6 @@ import { Trash2, Edit3, Star, X, Check, Loader2, Upload, Image as ImageIcon, Plu
 import { cn } from '@/lib/utils';
 
 import { uploadImageWithVariants } from "@/lib/imageUploadService";
-import { fixGalleryImagePreviews } from "@/lib/galleryImageGlitchFix";
 
 export default function GalleryAdmin() {
   const [items, setItems] = useState<any[]>([]);
@@ -336,5 +335,6 @@ export default function GalleryAdmin() {
     </section>
   );
 }
+
 
 
