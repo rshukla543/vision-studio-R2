@@ -93,7 +93,7 @@ export function SignatureStyle() {
 
           <motion.div
             ref={imageRef}
-            initial={{ opacity: 0, scale: 1.08 }}
+            initial={{ opacity: 0, scale: 1.2 }}
             animate={isImageInView ? { opacity: 1, scale: 1 } : {}}
             transition={{
               duration: 3.0,            // slow cinematic zoom
