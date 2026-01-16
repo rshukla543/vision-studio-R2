@@ -12,8 +12,6 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminLogin from "./pages/admin/AdminLogin";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
-import { testConnection } from "./testSupabase";
-import SupabaseInspector from "./dev/SupabaseInspector";
 
 
 const queryClient = new QueryClient();
