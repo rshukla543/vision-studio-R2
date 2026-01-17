@@ -319,22 +319,10 @@ export default function GalleryAdmin() {
           ))}
         </div>
       </div>
-
-
-      {/* ---------- GLITCH FIX BUTTON ---------- */}
-      <button
-        onClick={async () => {
-          if (!confirm("Fix missing gallery previews?")) return;
-          await fixGalleryImagePreviews();
-          fetchGallery();
-        }}
-        className="fixed bottom-6 left-6 text-[10px] uppercase tracking-widest px-4 py-3 rounded-full bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500/30"
-      >
-        Glitch Fix
-      </button>
     </section>
   );
 }
+
 
 
 
