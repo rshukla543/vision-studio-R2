@@ -1,34 +1,27 @@
-
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { motion, AnimatePresence, cubicBezier } from "framer-motion";
 
+// ... (AboutContent type remains same)
 type AboutContent = {
   eyebrow_text: string | null;
   headline: string | null;
   highlighted_word: string | null;
-
   body_paragraph_1: string | null;
   body_paragraph_2: string | null;
-
   weddings_label: string | null;
   weddings_count: string | null;
   experience_label: string | null;
   experience_years: string | null;
-
   quote_text: string | null;
-
   portrait_image_url: string | null;
   portrait_image_preview_url: string | null;
 };
-
 export function AboutSection() {
   const [content, setContent] = useState<AboutContent | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
   const [hiLoaded, setHiLoaded] = useState(false);
-
   const sectionRef = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
 
   useEffect(() => {
     supabase
@@ -38,154 +31,126 @@ export function AboutSection() {
       .limit(1)
       .then(({ data }) => data && setContent(data[0]));
   }, []);
-
-  useEffect(() => {
-    if (!content || hasAnimated.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          hasAnimated.current = true;
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    sectionRef.current && observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, [content]);
+  const LUXURY_EASE = cubicBezier(0.19, 1, 0.22, 1);
+//  transition: { duration: 1.2, ease: LUXURY_EASE } 
+  const LUXURY_TRANSITION = { duration: 1.4, ease: LUXURY_EASE };
 
   return (
-    <section
-      ref={sectionRef}
-      className={cn(
-        "relative py-32 bg-background min-h-screen transition-all duration-700 ease-out",
-        isVisible ? "opacity-100" : "opacity-0"
-      )}
-    >
-      <div className="container mx-auto px-6">
+    <section ref={sectionRef} className="relative py-20 md:py-40 bg-[#0a0a0a] overflow-hidden">
+      {/* Background Decorative Element */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full -mr-64 -mt-32 pointer-events-none" />
 
-        <div className="grid lg:grid-cols-2 gap-20 items-center mb-28">
-
-          {/* IMAGE */}
-          <div
-            className={cn(
-              "relative aspect-[4/5] transition-all duration-1000",
-              isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-12"
-            )}
+      <div className="container mx-auto px-6 relative">
+        
+        {/* 1. MOBILE QUOTE (Top of page on mobile only) */}
+        <div className="block md:hidden mb-16">
+          <motion.blockquote 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-serif text-2xl italic text-white/80 text-center leading-relaxed"
           >
-            {/* Outer sculpted frame */}
-            <div className="absolute -inset-4 rounded-[2.5rem] pointer-events-none">
-              <div className="absolute inset-0 rounded-[2.5rem] border border-[#c9a24d]/30" />
-              <div className="absolute inset-[6px] rounded-[2.2rem] border border-[#c9a24d]/10" />
+            “{content?.quote_text}”
+          </motion.blockquote>
+        </div>
+
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+
+          {/* 2. IMAGE BLOCK (Centered on Mobile) */}
+          <motion.div
+            initial={{ opacity: 0, x: -60, rotate: -2 }}
+            whileInView={{ opacity: 1, x: 0, rotate: 0 }}
+            viewport={{ once: true }}
+            transition={LUXURY_TRANSITION}
+            className="relative w-full aspect-[4/5] max-w-[420px] md:max-w-[500px] mx-auto lg:mx-0 order-1 lg:order-1"
+          >
+            {/* The "Cool" Frame Enhancement */}
+            <div className="absolute -inset-3 md:-inset-6 pointer-events-none z-0">
+              {/* Outer Glow */}
+              <div className="absolute inset-0 rounded-[2.5rem] bg-primary/5 blur-xl" />
+              {/* Double Border Frame */}
+              <div className="absolute inset-0 rounded-[2.5rem] border border-white/10" />
+              <div className="absolute inset-2 rounded-[2.2rem] border border-primary/20" />
             </div>
 
-            {/* <div className="absolute -inset-4 rounded-[2.5rem] border border-primary/20 pointer-events-none" /> */}
-
-            {/* Inner image shell */}
-            <div className="relative w-full h-full rounded-[2rem] overflow-hidden bg-white/5">
-
-              {/* <div className="relative w-full h-full rounded-[2rem] overflow-hidden bg-white/5 shadow-[0_40px_120px_rgba(0,0,0,0.6)]"> */}
-
-              {/* Film grain */}
-              <div className="absolute inset-0 opacity-[0.035] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-
-              {/* Preview */}
-              {content?.portrait_image_preview_url && (
-                <img
-                  src={content.portrait_image_preview_url}
-                  className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-70"
-                />
-              )}
-
-              {/* Hi-res */}
+            <div className="relative z-10 w-full h-full rounded-[2rem] overflow-hidden bg-[#111] shadow-[0_50px_100px_-20px_rgba(0,0,0,1)]">
               {content?.portrait_image_url && (
                 <img
                   src={content.portrait_image_url}
                   onLoad={() => setHiLoaded(true)}
                   className={cn(
-                    "absolute inset-0 w-full h-full object-cover transition-opacity duration-700",
-                    hiLoaded ? "opacity-100" : "opacity-0"
+                    "w-full h-full object-cover transition-all duration-1000 ease-out grayscale-[0.3] hover:grayscale-0 scale-110",
+                    hiLoaded ? "opacity-100 scale-100" : "opacity-0"
                   )}
+                  alt="Portrait"
                 />
               )}
-
-              {/* Edge light */}
-              <div className="absolute inset-0 ring-1 ring-[#c9a24d]/15" />
-
-              {/* <div className="absolute inset-0 ring-1 ring-white/10" /> */}
-
-              {/* Bottom vignette */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+              {/* Elegant Vignette */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+              <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[2rem]" />
             </div>
-          </div>
 
-          {/* TEXT */}
-          <div
-            className={cn(
-              "space-y-12 pt-6 transition-all duration-1000 delay-300",
-              isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-12"
-            )}
+            {/* Floating Badge (Optional Cool Detail) */}
+            <div className="absolute -bottom-4 -right-4 bg-primary text-black px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-xl z-20 hidden md:block">
+              EST. {content?.experience_years?.split(' ')[0]}
+            </div>
+          </motion.div>
+
+          {/* 3. TEXT BLOCK */}
+          <motion.div
+            initial={{ opacity: 0, x: 60 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={LUXURY_TRANSITION}
+            className="space-y-10 text-center lg:text-left order-2 lg:order-2"
           >
-            <span className="inline-block text-[11px] tracking-[0.45em] uppercase text-primary/80 border-b border-primary/20 pb-3">
-              {content?.eyebrow_text}
-            </span>
-
-            <h2 className="font-serif text-5xl md:text-6xl lg:text-7xl font-light leading-[1.1]">
-              {content?.headline}{" "}
-              <span className="block italic text-primary mt-2">
-                {content?.highlighted_word}
+            <div className="space-y-6">
+              <span className="inline-block text-[11px] tracking-[0.5em] uppercase text-primary font-bold border-b border-primary/30 pb-2">
+                {content?.eyebrow_text}
               </span>
-            </h2>
 
-            {/* Body copy */}
-            <div className="space-y-8 max-w-xl">
-              <p className="text-lg leading-relaxed text-foreground/70">
+              <h2 className="font-serif text-5xl md:text-7xl lg:text-8xl font-light leading-none text-white">
+                {content?.headline}
+                <span className="block italic text-primary mt-3 font-normal">{content?.highlighted_word}</span>
+              </h2>
+            </div>
+
+            <div className="space-y-8 max-w-xl mx-auto lg:mx-0">
+              <p className="text-base md:text-lg leading-relaxed text-white/50 font-light">
                 {content?.body_paragraph_1}
               </p>
-              <p className="text-sm leading-loose text-foreground/40 italic border-l border-primary/20 pl-6">
+              <p className="text-sm leading-loose text-white/30 italic border-l-2 border-primary/20 pl-6 text-left">
                 {content?.body_paragraph_2}
               </p>
             </div>
 
-            {/* Expertise / Experience */}
-            <div className="grid grid-cols-2 gap-12 pt-10 border-t border-border/40">
-              <div className="space-y-3">
-                <span className="block font-serif text-6xl text-primary leading-none">
-                  {content?.weddings_count}
-                </span>
-                <span className="block text-[11px] tracking-[0.4em] uppercase text-muted-foreground">
-                  {content?.weddings_label}
-                </span>
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-8 pt-10 border-t border-white/5 max-w-sm mx-auto lg:mx-0">
+              <div className="space-y-1">
+                <span className="block font-serif text-5xl text-white">{content?.weddings_count}</span>
+                <span className="block text-[9px] tracking-[0.2em] uppercase text-primary/60 font-medium">{content?.weddings_label}</span>
               </div>
-
-              <div className="space-y-3">
-                <span className="block font-serif text-6xl text-primary leading-none">
-                  {content?.experience_years}
-                </span>
-                <span className="block text-[11px] tracking-[0.4em] uppercase text-muted-foreground">
-                  {content?.experience_label}
-                </span>
+              <div className="space-y-1">
+                <span className="block font-serif text-5xl text-white">{content?.experience_years}</span>
+                <span className="block text-[9px] tracking-[0.2em] uppercase text-primary/60 font-medium">{content?.experience_label}</span>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* QUOTE — untouched */}
-        {content?.quote_text && (
-          <div
-            className={cn(
-              "max-w-2xl mx-auto text-center pt-20 border-t border-border/30 transition-all duration-1000 delay-700",
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            )}
+        {/* 4. DESKTOP QUOTE (Bottom of page for desktop) */}
+        <div className="hidden md:block mt-32 border-t border-white/5 pt-20">
+          <motion.blockquote 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto font-serif text-3xl md:text-4xl italic text-white/70 text-center leading-relaxed"
           >
-            <blockquote className="font-serif text-xl md:text-2xl lg:text-3xl italic text-foreground/80">
-              “{content.quote_text}”
-            </blockquote>
-          </div>
-        )}
+            “{content?.quote_text}”
+          </motion.blockquote>
+        </div>
+
       </div>
     </section>
-
   );
 }
