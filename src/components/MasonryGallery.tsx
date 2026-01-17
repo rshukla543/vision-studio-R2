@@ -1,6 +1,3 @@
-
-
-
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -29,14 +26,9 @@ function ImageWithPreview({
 
   useEffect(() => {
     if (!fullSrc) return;
-
     const img = new Image();
     img.src = fullSrc;
-
     img.onload = () => setSrc(fullSrc);
-    // img.decode()
-    //   .then(() => setSrc(fullSrc))
-    //   .catch(() => {});
   }, [fullSrc]);
 
   return (
@@ -55,17 +47,13 @@ function ImageWithPreview({
    Skeleton
 --------------------------------------------- */
 const GallerySkeleton = () => (
-  <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 space-y-3">
+  <div className="columns-2 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 space-y-3">
     {[...Array(8)].map((_, i) => (
       <div
         key={i}
         className={cn(
           'animate-shimmer rounded-2xl w-full bg-white/5',
-          i % 3 === 0
-            ? 'aspect-[3/4]'
-            : i % 3 === 1
-            ? 'aspect-square'
-            : 'aspect-[3/2]'
+          i % 3 === 0 ? 'aspect-[3/4]' : i % 3 === 1 ? 'aspect-square' : 'aspect-[3/2]'
         )}
       />
     ))}
@@ -98,7 +86,6 @@ export function MasonryGallery({ showFeatured = true }: { showFeatured?: boolean
   useEffect(() => {
     const fetchGallery = async () => {
       setLoading(true);
-
       const { data } = await supabase
         .from('gallery_images')
         .select('*')
@@ -112,10 +99,8 @@ export function MasonryGallery({ showFeatured = true }: { showFeatured?: boolean
           }))
         );
       }
-
       setLoading(false);
     };
-
     fetchGallery();
   }, []);
 
@@ -154,7 +139,7 @@ export function MasonryGallery({ showFeatured = true }: { showFeatured?: boolean
   };
 
   /* ---------------------------------------------
-     Intersection observer for smooth reveal
+      Intersection observer for smooth reveal
   --------------------------------------------- */
   const revealRefs = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
@@ -219,8 +204,9 @@ export function MasonryGallery({ showFeatured = true }: { showFeatured?: boolean
               onTouchStart={e => startDrag(e.touches[0].clientX)}
               onTouchMove={e => onDragMove(e.touches[0].clientX)}
               onTouchEnd={stopDrag}
-              className="flex gap-4 overflow-hidden scrollbar-hide cursor-grab active:cursor-grabbing select-none"
+              className="flex gap-1 overflow-x-auto no-scrollbar scrollbar-hide cursor-grab active:cursor-grabbing select-none"
             >
+              {/* <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }` }} /> */}
               {featuredItems.map((item, i) => (
                 <motion.div
                   key={item.id}
@@ -229,29 +215,19 @@ export function MasonryGallery({ showFeatured = true }: { showFeatured?: boolean
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.7, delay: i * 0.12 }}
-                  className="group relative w-80 flex-shrink-0 overflow-hidden rounded-2xl bg-black"
+                  className="group relative w-72 md:w-80 flex-shrink-0 overflow-hidden rounded-2xl"
                 >
-                  <div className="relative w-full aspect-[3/4] bg-black">
-  <ImageWithPreview
-    previewSrc={item.preview_image_url}
-    fullSrc={item.image_url}
-    alt={item.title}
-    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-  />
-</div>
-                  {/* <ImageWithPreview
+                  <ImageWithPreview
                     previewSrc={item.preview_image_url}
                     fullSrc={item.image_url}
                     alt={item.title}
-                    draggable={false}
-                    // className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  /> */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal-deep via-transparent opacity-60 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal-deep/80 via-transparent opacity-100 md:opacity-60 md:group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
                     <span className="text-[10px] tracking-[0.2em] uppercase text-primary">
                       {item.category}
                     </span>
-                    <p className="font-serif text-lg text-foreground">
+                    <p className="font-serif text-base md:text-lg text-foreground">
                       {item.title}
                     </p>
                   </div>
@@ -261,29 +237,10 @@ export function MasonryGallery({ showFeatured = true }: { showFeatured?: boolean
           </div>
         )}
 
-        {/* FILTERS
-         */}
-        {/* {!loading && (
-          <div className="flex justify-center gap-4 mb-12">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={cn(
-                  'px-6 py-2 text-xs uppercase tracking-[0.2em] rounded-full border transition',
-                  activeCategory === cat
-                    ? 'bg-primary text-black border-primary'
-                    : 'border-border/50 text-muted-foreground hover:border-primary hover:text-primary'
-                )}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        )} */}
-                {/* FILTERS - Responsive Scroll */}
+        {/* FILTERS - Clean Scrollbar Fix */}
         {!loading && (
-          <div className="flex overflow-x-auto scrollbar-hide md:justify-center gap-3 mb-12 pb-2">
+          <div className="flex overflow-x-auto scrollbar-hide md:justify-center gap-3 mb-16 pb-2 no-scrollbar">
+            <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }` }} />
             {categories.map(cat => (
               <button
                 key={cat}
@@ -303,28 +260,25 @@ export function MasonryGallery({ showFeatured = true }: { showFeatured?: boolean
         {loading ? (
           <GallerySkeleton />
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 space-y-3">
+          <div className="columns-2 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 space-y-3">
             {filteredItems.map((item, i) => (
               <motion.div
                 key={item.id}
                 ref={el => { if(el) revealRefs.current[i] = el; }}
                 onClick={() => handleOpenLightbox(i, false)}
-                className="group relative break-inside-avoid overflow-hidden rounded-2xl bg-black opacity-0 translate-y-6 transition-all duration-700 will-change-transform contain-layout"
-
-                // className="group relative break-inside-avoid overflow-hidden rounded-2xl bg-black opacity-0 translate-y-6 transition-all duration-700"
+                className="group relative break-inside-avoid overflow-hidden rounded-2xl opacity-0 translate-y-6 transition-all duration-700 will-change-transform contain-layout"
               >
                 <ImageWithPreview
                   previewSrc={item.preview_image_url}
                   fullSrc={item.image_url}
                   alt={item.title}
-                  className="block w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="block w-full object-cover transition-transform duration-700 md:group-hover:scale-105"
                 />
-                {/* Label overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-deep/90 via-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end text-center">
-                  <span className="text-[10px] uppercase text-primary tracking-[0.3em] mb-1">
+                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-deep/90 via-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity p-4 md:p-6 flex flex-col justify-end text-center">
+                  <span className="text-[8px] md:text-[10px] uppercase text-primary tracking-[0.3em] mb-1">
                     {item.category}
                   </span>
-                  <h3 className="text-sm text-foreground font-serif">{item.title}</h3>
+                  <h3 className="text-xs md:text-sm text-foreground font-serif">{item.title}</h3>
                 </div>
               </motion.div>
             ))}
