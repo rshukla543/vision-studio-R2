@@ -6,7 +6,7 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pt-20">
+      <main className="pt-0 overflow-hidden">
         <AboutSection />
       </main>
       <Footer />
