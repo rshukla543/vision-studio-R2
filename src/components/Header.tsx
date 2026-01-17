@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronRight } from 'lucide-react'; // Added ChevronRight
 import { cn } from '@/lib/utils';
 
 import Logo from '@/assets/logo.png';
@@ -44,17 +44,15 @@ export function Header() {
   return (
     <header className={cn(
       "fixed top-0 left-0 right-0 z-[100] transition-all duration-700",
-      scrolled || menuOpen? "py-2" : "bg-transparent py-4"
-      // scrolled || menuOpen ? "bg-black/70 backdrop-blur-lg py-2" : "bg-transparent py-4"
+      scrolled || menuOpen ? "py-2" : "bg-transparent py-4"
     )}>
       <div className="relative h-[80px] md:h-[110px] flex items-center justify-center px-6">
         
-        {/* THE STRIP WITH HOLE MASK (Desktop Only) */}
+        {/* STRIP MASK */}
         <div 
           className={cn(
             "absolute inset-0 w-full h-[80px] my-auto pointer-events-none transition-all duration-1000 hidden lg:block",
-            scrolled || menuOpen ? "bg-black/40  opacity-90 scale-x-110" : "opacity-20 scale-x-100"
-            // scrolled || menuOpen ? "bg-black/40  opacity-20 scale-x-110" : "opacity-30 scale-x-100"
+            scrolled || menuOpen ? "bg-black/40 opacity-90 scale-x-110" : "opacity-20 scale-x-100"
           )}
           style={{
             backgroundImage: `url(${Strip})`,
@@ -72,11 +70,8 @@ export function Header() {
             <NavLink to="/services">Services</NavLink>
           </div>
 
-          {/* Center Logo with BLOOMING GLOW */}
           <div className="relative px-12 group">
-            {/* The Pulse Glow */}
             <div className="absolute inset-0 bg-[#d6b35c] opacity-10 blur-3xl rounded-full scale-75 group-hover:scale-125 group-hover:opacity-30 transition-all duration-1000 animate-pulse" />
-            
             <Link to="/" aria-label="Home" className="relative z-10 block">
               <img
                 src={Logo}
@@ -92,12 +87,10 @@ export function Header() {
           </div>
         </nav>
 
-        {/* MOBILE HEADER (Logo + Burger) */}
+        {/* MOBILE HEADER */}
         <div className="lg:hidden w-full flex items-center justify-between z-[110]">
-           <div className="w-10" /> {/* Left Spacer to keep logo centered */}
-           
+           <div className="w-10" />
            <Link to="/" className="relative group active:scale-90 transition-all duration-500">
-              {/* Mobile Glow Pulse */}
               <div className="absolute inset-0 bg-[#d6b35c] opacity-20 blur-2xl rounded-full scale-90 animate-pulse" />
               <img 
                 src={Logo} 
@@ -115,34 +108,34 @@ export function Header() {
         </div>
       </div>
 
-      {/* MOBILE MENU PANEL */}
+      {/* MOBILE MENU PANEL - FIXED SECTION */}
       <div className={cn(
-        "lg:hidden fixed inset-0 bg-black/60 backdrop-blur-3xl transition-all duration-700 ease-in-out z-[90]",
+        "lg:hidden fixed inset-0 bg-black/95 backdrop-blur-3xl transition-all duration-700 ease-in-out z-[90]",
         menuOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       )}>
-        <nav className="flex flex-col items-center justify-center h-full gap-8 md:gap-12">
+        <div className='flex justify-center items-center h-full'>
+        <nav className="flex flex-col items-start justify-center h-full px-12 gap-8">
           {['Portfolio', 'Services', 'About', 'Contact'].map((name, i) => (
             <Link
               key={name}
               to={`/${name.toLowerCase()}`}
               className={cn(
-                "group relative text-[#d6b35c] text-3xl md:text-4xl font-light tracking-[0.4em] uppercase transition-all duration-700",
-                menuOpen ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+                "group flex items-center gap-4 text-[#d6b35c] text-lg font-bold tracking-[0.2em] uppercase transition-all duration-700",
+                menuOpen ? "translate-x-0 opacity-100" : "-translate-x-10 opacity-0"
               )}
               style={{ transitionDelay: `${menuOpen ? i * 100 + 200 : 0}ms` }}
             >
+              {/* Left Side Icon */}
+              <ChevronRight size={18} className="text-[#f5d98a] opacity-50 group-hover:translate-x-1 transition-transform" />
+              
               <span className="relative z-10 group-active:text-white transition-colors">{name}</span>
-              {/* Animated underline for mobile menu */}
-              <span className="block h-[1px] w-0 bg-gradient-to-r from-transparent via-[#f5d98a] to-transparent transition-all duration-500 group-hover:w-full group-active:w-full mt-4" />
+              
+              {/* Subtle underline */}
+              <span className="absolute -bottom-2 left-8 w-0 h-[1px] bg-[#f5d98a]/30 transition-all duration-500 group-hover:w-full" />
             </Link>
           ))}
-          
-          {/* Decorative element at bottom of menu */}
-          <div className={cn(
-            "w-24 h-[1px] bg-gradient-to-r from-transparent via-[#d6b35c] to-transparent mt-10 transition-all duration-1000 delay-500",
-            menuOpen ? "opacity-40 scale-x-100" : "opacity-0 scale-x-0"
-          )} />
         </nav>
+        </div>
       </div>
     </header>
   );
