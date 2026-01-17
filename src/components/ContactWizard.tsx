@@ -304,24 +304,42 @@ export function ContactWizard() {
               )}
             </div>
 
-            <div className="flex justify-between mt-12 pt-8 border-t border-border/30">
-              <Button variant="outline" onClick={() => setStep(prev => Math.max(prev - 1, 1))} disabled={step === 1}>
-                <ChevronLeft className="w-4 h-4 mr-2" /> Back
+            <div className="flex flex-col-reverse sm:flex-row justify-between gap-4 mt-12 pt-8 border-t border-border/30">
+              
+              {/* BACK BUTTON: Full width on mobile, auto on desktop */}
+              <Button 
+                variant="outline" 
+                onClick={() => setStep(prev => Math.max(prev - 1, 1))} 
+                disabled={step === 1}
+                className={cn(
+                  "h-12 text-xs tracking-widest uppercase transition-all",
+                  "w-full sm:w-auto" // Mobile: Full width, Desktop: Auto
+                )}
+              >
+                {/* <ChevronLeft className="w-4 h-4 mr-2" />  */}
+                Back
               </Button>
-
-              {step < 3 ? (
-                <Button variant="gold" onClick={nextStep}>
-                  Continue <ChevronRight className="w-4 h-4 ml-2" />
-                </Button>
-              ) : (
-                <div className="animate-in fade-in duration-500">
-                  <PayNowButton
-                    amount={depositAmount}
-                    customerDetails={{ ...formData, booking_date: formData.eventDate }}
-                  // customerDetails={formData} 
-                  />
-                </div>
-              )}
+            
+              {/* ACTION BUTTON: Continue or Pay Now */}
+              <div className="w-full sm:w-auto">
+                {step < 3 ? (
+                  <Button 
+                    variant="gold" 
+                    onClick={nextStep}
+                    className="w-full sm:w-auto h-12 text-xs tracking-widest uppercase font-bold px-10"
+                  >
+                    Continue 
+                    {/* <ChevronRight className="w-4 h-4 ml-2" /> */}
+                  </Button>
+                ) : (
+                  <div className="animate-in fade-in zoom-in-95 duration-500 w-full sm:w-auto">
+                    <PayNowButton
+                      amount={depositAmount}
+                      customerDetails={{ ...formData, booking_date: formData.eventDate }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
