@@ -115,7 +115,7 @@ export function Header() {
       )}>
         <div className='flex justify-center items-center h-full'>
         <nav className="flex flex-col items-start justify-center h-full px-12 gap-8">
-          {['Portfolio', 'Services', 'About', 'Contact'].map((name, i) => (
+          {['Home', 'Portfolio', 'Services', 'About', 'Contact'].map((name, i) => (
             <Link
               key={name}
               to={`/${name.toLowerCase()}`}
