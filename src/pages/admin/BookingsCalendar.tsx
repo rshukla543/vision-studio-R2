@@ -23,22 +23,24 @@ export function BookingsCalendar({ bookings, selectedDate, onSelect }: Props) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const renderHeader = () => (
-    <div className="flex items-center justify-between mb-8">
-      <h2 className="text-2xl font-light tracking-tight text-white uppercase">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
+      <h2 className="text-xl md:text-2xl font-light tracking-tight text-white uppercase">
         {format(currentMonth, "MMMM")} <span className="text-primary font-medium">{format(currentMonth, "yyyy")}</span>
       </h2>
       <div className="flex gap-2">
         <button
           onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="p-2 rounded-full hover:bg-white/10 transition border border-white/5"
+          className="p-2 md:p-2.5 rounded-full hover:bg-white/10 transition border border-white/5"
+          aria-label="Previous month"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
         </button>
         <button
           onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          className="p-2 rounded-full hover:bg-white/10 transition border border-white/5"
+          className="p-2 md:p-2.5 rounded-full hover:bg-white/10 transition border border-white/5"
+          aria-label="Next month"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
         </button>
       </div>
     </div>
@@ -47,10 +49,11 @@ export function BookingsCalendar({ bookings, selectedDate, onSelect }: Props) {
   const renderDays = () => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     return (
-      <div className="grid grid-cols-7 mb-4">
+      <div className="grid grid-cols-7 mb-2 md:mb-4">
         {days.map((day) => (
-          <div key={day} className="text-center text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold">
-            {day}
+          <div key={day} className="text-center text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold">
+            <span className="hidden sm:inline">{day}</span>
+            <span className="sm:hidden">{day.slice(0, 1)}</span>
           </div>
         ))}
       </div>
@@ -91,19 +94,21 @@ export function BookingsCalendar({ bookings, selectedDate, onSelect }: Props) {
         days.push(
           <div
             key={day.toString()}
-            className={`relative h-28 border-[0.5px] border-white/5 p-3 transition-all duration-300 group cursor-pointer
+            className={`relative h-12 sm:h-16 md:h-24 lg:h-28 border-[0.5px] border-white/5 p-1 sm:p-1.5 md:p-2 lg:p-3 transition-all duration-300 group cursor-pointer
       ${!isCurrentMonth ? "opacity-10" : "opacity-100"}
       ${isSelected ? "bg-primary/10 shadow-[inset_0_0_20px_rgba(212,175,55,0.1)]" : "hover:bg-white/[0.03]"}
     `}
             onClick={() => onSelect(formattedDate)}
           >
             {/* Date Number - Refined Font */}
-            <span className={`text-xs font-medium tracking-tighter ${isSelected ? "text-primary" : "text-white/40 group-hover:text-white/80"}`}>
+            <span className={`text-[9px] sm:text-[10px] md:text-xs font-medium tracking-tighter
+ ${isSelected ? "text-primary" : "text-white/40 group-hover:text-white/80"}`}>
               {format(day, "d")}
             </span>
 
             {/* Status Indicators */}
-            {status !== "free" && (
+
+            {/* {status !== "free" && (
               <div className="absolute inset-x-0 bottom-4 flex flex-col items-center gap-1.5">
                 <div className={cn(
                   "h-1 rounded-full transition-all duration-500",
@@ -115,7 +120,47 @@ export function BookingsCalendar({ bookings, selectedDate, onSelect }: Props) {
                   {status}
                 </span>
               </div>
+            )} */}
+
+            {status !== "free" && (
+              <>
+                {/* MOBILE: Small dot */}
+                <div className="absolute bottom-0.5 sm:bottom-1 left-1/2 -translate-x-1/2 md:hidden">
+                  <div
+                    className={cn(
+                      "w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full",
+                      status === "confirmed" && "bg-red-500",
+                      status === "pending" && "bg-primary",
+                      status === "blocked" && "bg-zinc-500"
+                    )}
+                  />
+                </div>
+
+                {/* TABLET: Medium indicator */}
+                <div className="hidden md:flex lg:hidden absolute inset-x-0 bottom-2 flex-col items-center gap-1">
+                  <div className={cn(
+                    "h-0.5 rounded-full transition-all duration-500",
+                    status === "confirmed" ? "w-6 bg-red-500/60" :
+                    status === "pending" ? "w-5 bg-primary" :
+                    "w-4 bg-zinc-600"
+                  )} />
+                </div>
+
+                {/* DESKTOP: Bar + Label */}
+                <div className="hidden lg:flex absolute inset-x-0 bottom-4 flex-col items-center gap-1.5">
+                  <div className={cn(
+                    "h-1 rounded-full transition-all duration-500",
+                    status === "confirmed" ? "w-8 bg-red-500/60 shadow-[0_0_8px_rgba(239,68,68,0.4)]" :
+                    status === "pending" ? "w-6 bg-primary shadow-[0_0_8px_rgba(212,175,55,0.4)]" :
+                    "w-4 bg-zinc-600"
+                  )} />
+                  <span className="text-[7px] uppercase tracking-[0.2em] text-white/30 font-bold">
+                    {status}
+                  </span>
+                </div>
+              </>
             )}
+
 
             {/* Active Border Glow */}
             {isSelected && (
@@ -169,7 +214,11 @@ export function BookingsCalendar({ bookings, selectedDate, onSelect }: Props) {
       {renderHeader()}
       {renderDays()}
       <div className="border border-white/10 rounded-xl overflow-hidden bg-black/20 backdrop-blur-md">
-        {renderCells()}
+        <div className="overflow-x-auto">
+          <div className="min-w-[280px]">
+            {renderCells()}
+          </div>
+        </div>
       </div>
     </div>
   );
