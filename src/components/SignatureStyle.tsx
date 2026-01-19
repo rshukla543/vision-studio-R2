@@ -27,172 +27,101 @@ export function SignatureStyle() {
 
   useEffect(() => {
     let mounted = true;
-    const fetchContent = async () => {
-      const { data, error } = await supabase
-        .from('signature_style')
-        .select('*')
-        .limit(1);
-
-      if (!error && data?.length && mounted) {
-        setContent(data[0]);
-      }
-    };
-    fetchContent();
+    supabase.from('signature_style').select('*').limit(1).then(({ data }) => {
+      if (data && mounted) setContent(data[0]);
+    });
     return () => { mounted = false; };
   }, []);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.18,
-        delayChildren: 0.35,
-        ease: LUXURY_EASE
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30, scale: 0.99 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { duration: 1.6, ease: LUXURY_EASE }
-    }
-  };
-
   const imageRef = useRef(null);
-  const isImageInView = useInView(imageRef, {
-    once: true,
-    margin: '-15% 0px',
-  });
+  const isImageInView = useInView(imageRef, { once: true, margin: '-20% 0px' });
+
+  /* ---------------- STATS BLOCK (REUSED) ---------------- */
+  const Stats = ({ mobile = false }) => (
+    <motion.div
+      className={cn(
+        "pt-10 border-t border-white/5",
+        mobile ? "lg:hidden" : "hidden lg:block"
+      )}
+    >
+      <div className="grid grid-cols-3 gap-4 text-center">
+        {[1, 2, 3].map((i) => (
+          <div key={i}>
+            <span className="block font-serif text-3xl text-white">
+              {content?.[`stat_${i}_value` as keyof SignatureContent]}
+            </span>
+            <span className="text-[10px] tracking-[0.2em] uppercase text-primary/50">
+              {content?.[`stat_${i}_label` as keyof SignatureContent]}
+            </span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
 
   return (
-    <section className="relative py-20 md:py-40 overflow-hidden bg-[#0a0a0a]">
-      <div className="hidden md:block absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+    <section className="relative py-20 md:py-40 bg-[#0a0a0a] overflow-hidden">
+      <div className="container mx-auto px-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-16 items-center">
 
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          {/* ---------- TEXT ---------- */}
+          <div className="order-1 w-full text-center lg:text-left">
+            {content && (
+              <>
+                <span className="text-[10px] tracking-[0.5em] uppercase text-primary">
+                  {content.tagline}
+                </span>
 
-          {/* IMAGE COLUMN */}
+                <h2 className="mt-6 font-serif text-5xl md:text-8xl text-white">
+                  {content.title_line_1}
+                  <span className="block italic text-primary">
+                    {content.title_highlight}
+                  </span>
+                </h2>
+
+                <p className="mt-6 text-white/50 max-w-lg mx-auto lg:mx-0">
+                  {content.description_1}
+                </p>
+
+                {/* Desktop stats */}
+                <Stats />
+              </>
+            )}
+          </div>
+
+          {/* ---------- IMAGE ---------- */}
           <motion.div
             ref={imageRef}
-            initial={{ opacity: 0, scale: 1.2 }}
+            className="order-2 w-full flex justify-center"
+            initial={{ opacity: 0, scale: 1.15 }}
             animate={isImageInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 3.0, ease: LUXURY_EASE }}
-            className="order-last lg:order-last w-full"
+            transition={{ duration: 3, ease: LUXURY_EASE }}
           >
-            <div className="relative aspect-square max-w-[300px] md:max-w-[520px] flex items-center justify-center mx-auto">
-              <div className="absolute w-full h-full border border-white/[0.05] rounded-full animate-[spin_20s_linear_infinite]" />
-              <div className="absolute w-[92%] h-[92%] border border-primary/10 rounded-full" />
+            <div className="relative w-[280px] md:w-[520px] aspect-square">
 
-              <motion.div
-                whileHover={{ scale: 1.06 }}
-                transition={{ duration: 0.9, ease: LUXURY_EASE }}
-                className="relative w-[84%] h-[84%] rounded-full overflow-hidden bg-[#111] border border-white/10 shadow-2xl cursor-pointer"
-              >
-                {content?.image_url && (
-                  <>
-                    <img
-                      src={content.preview_image_url || content.image_url}
-                      className={cn(
-                        "absolute inset-0 w-full h-full object-cover blur-md transition-opacity duration-1000",
-                        hiResLoaded ? "opacity-0" : "opacity-100"
-                      )}
-                      alt=""
-                    />
-                    <img
-                      src={content.image_url}
-                      onLoad={() => setHiResLoaded(true)}
-                      decoding="async"
-                      className={cn(
-                        "absolute inset-0 w-full h-full object-cover transition-all duration-1000 will-change-transform",
-                        hiResLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"
-                      )}
-                      alt="Signature Style"
-                    />
-                  </>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent" />
-              </motion.div>
+              {/* GLOWING RINGS */}
+              <div className="absolute inset-0 rounded-full border border-primary/30 shadow-[0_0_40px_rgba(212,175,55,0.25)]" />
+              <div className="absolute inset-6 rounded-full border border-white/10" />
+              <div className="absolute -inset-8 rounded-full border border-primary/10 blur-sm" />
+
+              {/* ORBIT SHAPES */}
+              <div className="absolute -top-6 left-1/2 w-2 h-2 bg-primary rounded-full blur-sm" />
+              <div className="absolute bottom-8 -right-4 w-3 h-3 bg-primary/60 rounded-full blur-md" />
+
+              {/* IMAGE */}
+              <div className="absolute inset-10 rounded-full overflow-hidden border border-white/10">
+                <img
+                  src={content?.image_url || ''}
+                  className="w-full h-full object-cover"
+                  alt=""
+                />
+              </div>
             </div>
           </motion.div>
 
-          {/* MOBILE STATS (below image) */}
-          {content && (
-            <div className="md:hidden w-full pt-12">
-              <div className="flex justify-between gap-4 border-t border-white/5 pt-8">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="text-center">
-                    <span className="block font-serif text-3xl text-white">
-                      {content[`stat_${i}_value` as keyof SignatureContent]}
-                    </span>
-                    <span className="text-[8px] tracking-[0.2em] uppercase text-primary/50">
-                      {content[`stat_${i}_label` as keyof SignatureContent]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TEXT COLUMN */}
-          <div className="w-full">
-            <AnimatePresence mode="wait">
-              {content ? (
-                <motion.div
-                  key="main-content"
-                  variants={containerVariants}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.1 }}
-                  className="space-y-10 text-center lg:text-left will-change-transform"
-                >
-                  <motion.div variants={itemVariants}>
-                    <span className="text-[10px] tracking-[0.5em] md:tracking-[0.8em] uppercase text-primary font-bold inline-block border-b border-primary/20 pb-2">
-                      {content.tagline}
-                    </span>
-                  </motion.div>
-
-                  <motion.div variants={itemVariants} className="space-y-2">
-                    <h2 className="font-serif text-5xl md:text-8xl font-light text-white leading-[1.1] tracking-tight">
-                      {content.title_line_1}
-                      <span className="block italic text-primary mt-2">
-                        {content.title_highlight}
-                      </span>
-                    </h2>
-                  </motion.div>
-
-                  <motion.div variants={itemVariants} className="space-y-6 max-w-lg mx-auto lg:mx-0">
-                    <p className="text-base md:text-xl text-white/50 leading-relaxed font-light">
-                      {content.description_1}
-                    </p>
-                    <p className="text-white/30 text-sm italic border-l-2 border-primary/20 pl-6 text-left mx-auto lg:mx-0">
-                      {content.description_2}
-                    </p>
-                  </motion.div>
-
-                  {/* DESKTOP STATS */}
-                  <div className="hidden md:block pt-10 border-t border-white/5">
-                    <div className="grid grid-cols-3 gap-6">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="text-left group">
-                          <span className="block font-serif text-5xl text-white group-hover:text-primary transition-colors">
-                            {content[`stat_${i}_value` as keyof SignatureContent]}
-                          </span>
-                          <span className="text-[10px] tracking-[0.2em] uppercase text-primary/50">
-                            {content[`stat_${i}_label` as keyof SignatureContent]}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
+          {/* ---------- MOBILE STATS (BELOW IMAGE) ---------- */}
+          <div className="order-3 w-full">
+            <Stats mobile />
           </div>
 
         </div>
