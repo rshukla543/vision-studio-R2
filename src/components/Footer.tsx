@@ -84,10 +84,8 @@ export function Footer() {
                <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-primary/30 to-transparent" />
             </div>
           </Link>
-          {/* <p className="text-sm md:text-base text-muted-foreground/60 max-w-lg leading-relaxed italic mt-4 font-serif">
-            "{settings.brand_tagline}" */}
           <p className="text-sm md:text-base text-muted-foreground/60 max-w-lg leading-relaxed italic mt-4 font-serif">
-    "{settings.brand_tagline}"
+            "{settings.brand_tagline}" 
           </p>
         </div>
 
