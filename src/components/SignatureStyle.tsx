@@ -33,21 +33,43 @@ export function SignatureStyle() {
     return () => { mounted = false; };
   }, []);
 
+  /* ---------------- ANIMATION VARIANTS ---------------- */
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.18,
+        delayChildren: 0.35,
+        ease: LUXURY_EASE
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 1.6, ease: LUXURY_EASE }
+    }
+  };
+
   const imageRef = useRef(null);
   const isImageInView = useInView(imageRef, { once: true, margin: '-20% 0px' });
 
-  /* ---------------- STATS BLOCK (REUSED) ---------------- */
   const Stats = ({ mobile = false }) => (
     <motion.div
+      variants={itemVariants}
       className={cn(
         "pt-10 border-t border-white/5",
         mobile ? "lg:hidden" : "hidden lg:block"
       )}
     >
-      <div className="grid grid-cols-3 gap-4 text-center">
+      <div className="grid grid-cols-3 gap-4 text-center lg:text-left">
         {[1, 2, 3].map((i) => (
           <div key={i}>
-            <span className="block font-serif text-3xl text-white">
+            <span className="block font-serif text-3xl md:text-5xl text-white">
               {content?.[`stat_${i}_value` as keyof SignatureContent]}
             </span>
             <span className="text-[10px] tracking-[0.2em] uppercase text-primary/50">
@@ -64,32 +86,45 @@ export function SignatureStyle() {
       <div className="container mx-auto px-6">
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-16 items-center">
 
-          {/* ---------- TEXT ---------- */}
-          <div className="order-1 w-full text-center lg:text-left">
+          {/* ---------------- TEXT ---------------- */}
+          <AnimatePresence>
             {content && (
-              <>
-                <span className="text-[10px] tracking-[0.5em] uppercase text-primary">
+              <motion.div
+                className="order-1 w-full text-center lg:text-left"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+              >
+                <motion.span variants={itemVariants}
+                  className="text-[10px] tracking-[0.5em] uppercase text-primary border-b border-primary/20 pb-2 inline-block">
                   {content.tagline}
-                </span>
+                </motion.span>
 
-                <h2 className="mt-6 font-serif text-5xl md:text-8xl text-white">
+                <motion.h2 variants={itemVariants}
+                  className="mt-8 font-serif text-5xl md:text-8xl text-white leading-tight">
                   {content.title_line_1}
-                  <span className="block italic text-primary">
+                  <span className="block italic text-primary mt-2">
                     {content.title_highlight}
                   </span>
-                </h2>
+                </motion.h2>
 
-                <p className="mt-6 text-white/50 max-w-lg mx-auto lg:mx-0">
+                <motion.p variants={itemVariants}
+                  className="mt-6 text-white/50 max-w-lg mx-auto lg:mx-0">
                   {content.description_1}
-                </p>
+                </motion.p>
 
-                {/* Desktop stats */}
+                <motion.p variants={itemVariants}
+                  className="mt-6 text-white/30 text-sm italic border-l-2 border-primary/20 pl-6 max-w-lg mx-auto lg:mx-0">
+                  {content.description_2}
+                </motion.p>
+
                 <Stats />
-              </>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
 
-          {/* ---------- IMAGE ---------- */}
+          {/* ---------------- IMAGE ---------------- */}
           <motion.div
             ref={imageRef}
             className="order-2 w-full flex justify-center"
@@ -99,27 +134,27 @@ export function SignatureStyle() {
           >
             <div className="relative w-[280px] md:w-[520px] aspect-square">
 
-              {/* GLOWING RINGS */}
-              <div className="absolute inset-0 rounded-full border border-primary/30 shadow-[0_0_40px_rgba(212,175,55,0.25)]" />
-              <div className="absolute inset-6 rounded-full border border-white/10" />
-              <div className="absolute -inset-8 rounded-full border border-primary/10 blur-sm" />
+              {/* Rings */}
+              <div className="absolute inset-0 rounded-full border border-primary/30 shadow-[0_0_25px_rgba(212,175,55,0.25)]" />
+              <div className="absolute inset-6 rounded-full border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.08)]" />
+              <div className="absolute -inset-10 rounded-full border border-primary/10 blur-sm" />
 
-              {/* ORBIT SHAPES */}
-              <div className="absolute -top-6 left-1/2 w-2 h-2 bg-primary rounded-full blur-sm" />
-              <div className="absolute bottom-8 -right-4 w-3 h-3 bg-primary/60 rounded-full blur-md" />
-
-              {/* IMAGE */}
-              <div className="absolute inset-10 rounded-full overflow-hidden border border-white/10">
+              {/* Image */}
+              <motion.div
+                whileHover={{ scale: 1.06 }}
+                transition={{ duration: 0.9, ease: LUXURY_EASE }}
+                className="absolute inset-10 rounded-full overflow-hidden border border-white/10"
+              >
                 <img
                   src={content?.image_url || ''}
                   className="w-full h-full object-cover"
-                  alt=""
+                  alt="Signature Style"
                 />
-              </div>
+              </motion.div>
             </div>
           </motion.div>
 
-          {/* ---------- MOBILE STATS (BELOW IMAGE) ---------- */}
+          {/* ---------------- MOBILE STATS ---------------- */}
           <div className="order-3 w-full">
             <Stats mobile />
           </div>
