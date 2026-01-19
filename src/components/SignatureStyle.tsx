@@ -120,7 +120,7 @@ export function SignatureStyle() {
                 </motion.p>
 
                 <div className="order-3 w-full">
-                  <Stats mobile />
+                  <Stats />
                 </div>
               </motion.div>
             )}
