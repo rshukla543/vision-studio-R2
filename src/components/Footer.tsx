@@ -85,8 +85,11 @@ export function Footer() {
             </div>
           </Link>
           <p className="text-sm md:text-base text-muted-foreground/60 max-w-lg leading-relaxed italic mt-4 font-serif">
-            "{settings.brand_tagline}" 
+            "{settings.brand_tagline}"
           </p>
+          {/* <p className="text-sm md:text-base text-white/40 max-w-lg leading-relaxed italic mt-4 font-serif">
+            "{settings.brand_tagline}"
+          </p> */}
         </div>
 
         {/* 2. NEW COMBINED ACTION BAR (CONNECT & ENQUIRY) */}
