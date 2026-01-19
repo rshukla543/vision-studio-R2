@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 
 export default function BookingsAdmin() {
   const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   // const [selectedDate, setSelectedDate] = useState<string | null>(new Date().toISOString().split('T')[0]);
   const [selectedDate, setSelectedDate] = useState<string | null>(format(new Date(), 'yyyy-MM-dd'));
 
@@ -16,8 +17,10 @@ export default function BookingsAdmin() {
   }, []);
 
   const fetchBookings = async () => {
+    setLoading(true);
     const { data } = await supabase.from("bookings").select("*").order("created_at", { ascending: false });
     if (data) setBookings(data);
+    setLoading(false);
   };
 
   const updateStatus = async (id: string, status: string) => {
@@ -122,6 +125,7 @@ export default function BookingsAdmin() {
                 bookings={bookings}
                 selectedDate={selectedDate}
                 onSelect={setSelectedDate}
+                loading={loading}
               />
             </div>
           </div>
@@ -324,5 +328,3 @@ export default function BookingsAdmin() {
     </section>
   );
 }
-
-
