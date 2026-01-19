@@ -17,9 +17,21 @@ type Props = {
   bookings: Booking[];
   selectedDate: string | null;
   onSelect: (date: string) => void;
+  loading?: boolean;
 };
 
-export function BookingsCalendar({ bookings, selectedDate, onSelect }: Props) {
+const CalendarSkeleton = () => (
+  <div className="grid grid-cols-7 gap-[1px]">
+    {[...Array(35)].map((_, i) => (
+      <div
+        key={i}
+        className="h-12 sm:h-16 md:h-24 lg:h-28 bg-white/[0.04] animate-pulse rounded-[6px]"
+      />
+    ))}
+  </div>
+);
+
+export function BookingsCalendar({ bookings, selectedDate, onSelect, loading = false }: Props) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const renderHeader = () => (
@@ -213,12 +225,18 @@ export function BookingsCalendar({ bookings, selectedDate, onSelect }: Props) {
     <div className="w-full">
       {renderHeader()}
       {renderDays()}
-      <div className="border border-white/10 rounded-xl overflow-hidden bg-black/20 backdrop-blur-md">
-        <div className="overflow-x-auto">
-          <div className="min-w-[280px]">
-            {renderCells()}
+      <div className="border border-white/10 rounded-xl overflow-hidden bg-black/20 backdrop-blur-md min-h-[280px]">
+        {loading ? (
+          <div className="p-3 sm:p-4">
+            <CalendarSkeleton />
           </div>
-        </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <div className="min-w-[320px]">
+              {renderCells()}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
