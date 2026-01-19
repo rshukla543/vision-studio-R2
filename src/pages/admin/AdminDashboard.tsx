@@ -8,6 +8,7 @@ import HeroSlidesAdmin from "./HeroSlidesAdmin";
 const SignatureStyleAdmin = lazy(() => import("./SignatureStyleAdmin"));
 const NewbornFeatureAdmin = lazy(() => import("./NewbornFeatureAdmin"));
 const GalleryAdmin = lazy(() => import("./GalleryAdmin"));
+const WeddingThemesAdmin = lazy(() => import("./WeddingThemesAdmin"));
 const TestimonialsAdmin = lazy(() => import("./TestimonialsAdmin"));
 const SiteSettingsAdmin = lazy(() => import("./SiteSettingsAdmin"));
 const AboutContentAdmin = lazy(() => import("./AboutContentAdmin"));
@@ -34,7 +35,7 @@ const revealVariants: Variants = {
 export default function AdminDashboard() {
   return (
     // layoutRoot helps Framer sync all nested animations
-    <motion.div layoutRoot className="space-y-32">
+    <motion.div layoutRoot className="space-y-16 md:space-y-24 lg:space-y-32">
       <motion.header
         initial="hidden"
         whileInView="visible"
@@ -71,6 +72,10 @@ export default function AdminDashboard() {
 
         <AnimatedSection>
           <GalleryAdmin />
+        </AnimatedSection>
+
+        <AnimatedSection>
+          <WeddingThemesAdmin />
         </AnimatedSection>
 
         <AnimatedSection>
@@ -118,7 +123,7 @@ function AnimatedSection({ children }: { children: React.ReactNode }) {
       layout // 2. FIX: Handle layout shifts automatically
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.1 }}
+      viewport={{ once: true, amount: 0.05, margin: "-50px" }}
       variants={revealVariants}
     >
       {children}
