@@ -15,12 +15,12 @@ const Index = () => {
       <Header />
       <main>
         <HeroSlider />
+        <NewbornFeature />
+        <TestimonialsSection />
         <SignatureStyle />
+        <MasonryGallery />
         <WeddingThemes />
         <AboutSection />
-        <NewbornFeature />
-        <MasonryGallery />
-        <TestimonialsSection />
         <ContactWizard />
       </main>
       <Footer />
