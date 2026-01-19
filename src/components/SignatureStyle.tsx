@@ -119,7 +119,9 @@ export function SignatureStyle() {
                   {content.description_2}
                 </motion.p>
 
-                <Stats />
+                <div className="order-3 w-full">
+                  <Stats mobile />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
