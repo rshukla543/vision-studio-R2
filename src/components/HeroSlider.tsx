@@ -44,7 +44,8 @@ export function HeroSlider() {
       };
 
       if (!error && data) {
-        setSlides([videoSlide, ...data]);
+        // Move video to the end so it loads last
+        setSlides([...data, videoSlide]);
         setIsReady(true);
       } else {
         setSlides([videoSlide]);
@@ -104,6 +105,7 @@ export function HeroSlider() {
     <section 
       /* FIX 4: Aspect Ratio Lock for proper width fitting */
       className="relative w-full h-[56.25vw] md:h-screen max-w-full overflow-hidden bg-black select-none touch-pan-y"
+      // className="relative w-full max-w-[100vw] overflow-hidden bg-black select-none touch-pan-y"
       style={{ aspectRatio: window.innerWidth < 768 ? '16/9' : '21/9', minHeight: '400px' }}
       onMouseDown={(e) => onStart(e.clientX)}
       onMouseUp={(e) => onEnd(e.clientX)}
@@ -182,7 +184,7 @@ export function HeroSlider() {
 
       {/* CONTENT LAYER (Fix 5: Enhanced Animations) */}
       {shouldShowContent && (
-        <div className="relative z-30 h-full flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+        <div className="relative z-30 h-full hidden md:flex flex-col items-center justify-center text-center px-4 overflow-hidden">
           <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000 zoom-in-95">
             <div className="mb-4 flex items-center justify-center gap-3">
               <span className="w-8 md:w-12 h-px bg-primary/60" />
