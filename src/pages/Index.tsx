@@ -16,8 +16,8 @@ const Index = () => {
       <main>
         <HeroSlider />
         <NewbornFeature />
-        <TestimonialsSection />
         <SignatureStyle />
+        <TestimonialsSection />
         <MasonryGallery />
         <WeddingThemes />
         <ContactWizard />
