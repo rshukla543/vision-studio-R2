@@ -20,8 +20,8 @@ const Index = () => {
         <SignatureStyle />
         <MasonryGallery />
         <WeddingThemes />
-        <AboutSection />
         <ContactWizard />
+        <AboutSection />
       </main>
       <Footer />
     </div>
