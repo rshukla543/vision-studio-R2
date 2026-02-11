@@ -1,10 +1,24 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronRight } from 'lucide-react'; // Added ChevronRight
+import { Menu, X, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence, cubicBezier } from 'framer-motion';
 
 import Logo from '@/assets/logo.png';
 import Strip from '@/assets/strip.png';
+
+const EASE = cubicBezier(0.22, 1, 0.36, 1);
+
+const menuItemVariants = {
+  hidden: { opacity: 0, x: -30, filter: 'blur(4px)' },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    filter: 'blur(0px)',
+    transition: { delay: i * 0.08 + 0.15, duration: 0.5, ease: EASE },
+  }),
+  exit: { opacity: 0, x: -20, transition: { duration: 0.2 } },
+};
 
 export function Header() {
   const location = useLocation();
@@ -28,18 +42,26 @@ export function Header() {
   };
 
   const linkBase = 'relative group text-[14px] md:text-[15px] font-semibold tracking-[0.35em] uppercase transition-all duration-500 ease-out';
-  const gold = 'text-[#d6b35c] hover:text-[#f5d98a]';
-  const active = 'text-[#f5d98a]';
+  const gold = 'text-primary hover:text-gold-light';
+  const active = 'text-gold-light';
 
   const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => (
     <Link
       to={to}
-      className={cn(linkBase, gold, location.pathname === to && active, "hover:scale-110 active:scale-95")}
+      className={cn(linkBase, gold, location.pathname === to && active, "hover:scale-105 active:scale-95")}
     >
       <span className="relative z-10">{children}</span>
-      <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-gradient-to-r from-transparent via-[#f5d98a] to-transparent transition-all duration-500 group-hover:w-full group-hover:drop-shadow-[0_0_8px_#f5d98a]" />
+      <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-gradient-to-r from-transparent via-gold-light to-transparent transition-all duration-500 group-hover:w-full" />
     </Link>
   );
+
+  const navLinks = [
+    { name: 'Home', to: '/' },
+    { name: 'Portfolio', to: '/portfolio' },
+    { name: 'Services', to: '/services' },
+    { name: 'About', to: '/about' },
+    { name: 'Contact', to: '/contact' },
+  ];
 
   return (
     <header className={cn(
@@ -52,7 +74,7 @@ export function Header() {
         <div 
           className={cn(
             "absolute inset-0 w-full h-[80px] my-auto pointer-events-none transition-all duration-1000 hidden lg:block",
-            scrolled || menuOpen ? "bg-black/40 opacity-90 scale-x-110" : "opacity-20 scale-x-100"
+            scrolled || menuOpen ? "bg-background/80 backdrop-blur-md opacity-100 scale-x-110" : "opacity-20 scale-x-100"
           )}
           style={{
             backgroundImage: `url(${Strip})`,
@@ -71,7 +93,7 @@ export function Header() {
           </div>
 
           <div className="relative px-12 group">
-            <div className="absolute inset-0 bg-[#d6b35c] opacity-10 blur-3xl rounded-full scale-75 group-hover:scale-125 group-hover:opacity-30 transition-all duration-1000 animate-pulse" />
+            <div className="absolute inset-0 bg-primary opacity-10 blur-3xl rounded-full scale-75 group-hover:scale-125 group-hover:opacity-30 transition-all duration-1000 animate-pulse" />
             <Link to="/" aria-label="Home" className="relative z-10 block">
               <img
                 src={Logo}
@@ -91,7 +113,7 @@ export function Header() {
         <div className="lg:hidden w-full flex items-center justify-between z-[110]">
            <div className="w-10" />
            <Link to="/" className="relative group active:scale-90 transition-all duration-500">
-              <div className="absolute inset-0 bg-[#d6b35c] opacity-20 blur-2xl rounded-full scale-90 animate-pulse" />
+              <div className="absolute inset-0 bg-primary opacity-20 blur-2xl rounded-full scale-90 animate-pulse" />
               <img 
                 src={Logo} 
                 alt="Logo" 
@@ -99,45 +121,52 @@ export function Header() {
               />
            </Link>
 
-           <button
+           <motion.button
             onClick={toggleMenu}
-            className="text-[#d6b35c] p-2 hover:scale-110 transition-transform active:rotate-90 duration-300"
+            whileTap={{ scale: 0.9, rotate: 90 }}
+            className="text-primary p-2"
           >
             {menuOpen ? <X size={32} /> : <Menu size={32} />}
-          </button>
+          </motion.button>
         </div>
       </div>
 
-      {/* MOBILE MENU PANEL - FIXED SECTION */}
-      <div className={cn(
-        "lg:hidden fixed inset-0 bg-black/95 backdrop-blur-3xl transition-all duration-700 ease-in-out z-[90]",
-        menuOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
-      )}>
-        <div className='flex justify-center items-center h-full'>
-        <nav className="flex flex-col items-start justify-center h-full px-12 gap-8">
-          {['Home', 'Portfolio', 'Services', 'About', 'Contact'].map((name, i) => (
-            <Link
-              key={name}
-              to={`/${name.toLowerCase()}`}
-              className={cn(
-                "group flex items-center gap-4 text-[#d6b35c] text-lg font-bold tracking-[0.2em] uppercase transition-all duration-700",
-                menuOpen ? "translate-x-0 opacity-100" : "-translate-x-10 opacity-0"
-              )}
-              style={{ transitionDelay: `${menuOpen ? i * 100 + 200 : 0}ms` }}
-            >
-              {/* Left Side Icon */}
-              <ChevronRight size={18} className="text-[#f5d98a] opacity-50 group-hover:translate-x-1 transition-transform" />
-              
-              <span className="relative z-10 group-active:text-white transition-colors">{name}</span>
-              
-              {/* Subtle underline */}
-              <span className="absolute -bottom-2 left-8 w-0 h-[1px] bg-[#f5d98a]/30 transition-all duration-500 group-hover:w-full" />
-            </Link>
-          ))}
-        </nav>
-        </div>
-      </div>
+      {/* MOBILE MENU PANEL */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="lg:hidden fixed inset-0 bg-background/98 backdrop-blur-2xl z-[90]"
+          >
+            <nav className="flex flex-col items-start justify-center h-full px-12 gap-10">
+              {navLinks.map((link, i) => (
+                <motion.div
+                  key={link.name}
+                  custom={i}
+                  variants={menuItemVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
+                  <Link
+                    to={link.to}
+                    className={cn(
+                      "group flex items-center gap-4 text-primary text-xl font-bold tracking-[0.2em] uppercase transition-all duration-500",
+                      location.pathname === link.to && "text-gold-light"
+                    )}
+                  >
+                    <ChevronRight size={18} className="text-gold-light opacity-50 group-hover:translate-x-1 group-hover:opacity-100 transition-all" />
+                    <span className="relative z-10 group-hover:text-gold-light transition-colors">{link.name}</span>
+                  </Link>
+                </motion.div>
+              ))}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
-
