@@ -2,6 +2,9 @@ import { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { motion, AnimatePresence, cubicBezier } from 'framer-motion';
+
+const EASE = cubicBezier(0.22, 1, 0.36, 1);
 
 type Testimonial = {
   id: string;
@@ -11,16 +14,10 @@ type Testimonial = {
   image_url: string;
 };
 
-const ANIMATION_DURATION = 500;
-
 export function TestimonialsSection() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
+  const [direction, setDirection] = useState(1);
   const animationLock = useRef(false);
 
   /* ---------------- FETCH DATA ---------------- */
@@ -34,76 +31,50 @@ export function TestimonialsSection() {
       });
   }, []);
 
-  /* ---------------- SCROLL IN ---------------- */
-  useEffect(() => {
-    if (!testimonials.length || hasAnimated.current) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.intersectionRatio >= 0.1) {
-        // if (entry.isIntersecting) {
-          setIsVisible(true);
-          hasAnimated.current = true;
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, [testimonials.length]);
-
   /* ---------------- SLIDER CORE ---------------- */
   const goToSlide = (index: number) => {
     if (animationLock.current || index === currentIndex) return;
-
     animationLock.current = true;
-    setIsAnimating(true);
-
-    setTimeout(() => {
-      setCurrentIndex(index);
-      setIsAnimating(false);
-      animationLock.current = false;
-    }, ANIMATION_DURATION);
+    setDirection(index > currentIndex ? 1 : -1);
+    setCurrentIndex(index);
+    setTimeout(() => { animationLock.current = false; }, 600);
   };
 
-  const nextSlide = () =>
-    goToSlide((currentIndex + 1) % testimonials.length);
-
-  const prevSlide = () =>
-    goToSlide(
-      (currentIndex - 1 + testimonials.length) %
-        testimonials.length
-    );
+  const nextSlide = () => goToSlide((currentIndex + 1) % testimonials.length);
+  const prevSlide = () => goToSlide((currentIndex - 1 + testimonials.length) % testimonials.length);
 
   /* ---------------- AUTO ROTATE ---------------- */
   useEffect(() => {
     if (!testimonials.length) return;
-
     const interval = setInterval(() => {
       if (!animationLock.current) nextSlide();
     }, 6000);
-
     return () => clearInterval(interval);
   }, [currentIndex, testimonials.length]);
 
   if (!testimonials.length) return null;
   const t = testimonials[currentIndex];
 
+  const slideVariants = {
+    enter: (dir: number) => ({ opacity: 0, x: dir * 40 }),
+    center: { opacity: 1, x: 0 },
+    exit: (dir: number) => ({ opacity: 0, x: dir * -40 }),
+  };
+
   return (
-    <section
-      ref={sectionRef}
-      className="relative py-32 bg-secondary overflow-hidden"
-    >
+    <section className="relative py-32 md:py-40 bg-secondary overflow-hidden">
+      {/* Ambient glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/3 blur-[150px] rounded-full pointer-events-none" />
+
       <div className="container mx-auto px-6 relative z-10">
 
         {/* HEADER */}
-        <div
-          className={cn(
-            'text-center mb-20 transition-all duration-1000',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 1, ease: EASE }}
+          className="text-center mb-20"
         >
           <span className="text-xs tracking-[0.3em] uppercase text-primary">
             Client Stories
@@ -111,99 +82,111 @@ export function TestimonialsSection() {
           <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-light text-foreground mt-4">
             Words from the <span className="italic text-primary">Heart</span>
           </h2>
-        </div>
+        </motion.div>
 
         {/* CONTENT */}
-        <div
-          className={cn(
-            'max-w-5xl mx-auto transition-all duration-1000 delay-150',
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 1, delay: 0.15, ease: EASE }}
+          className="max-w-5xl mx-auto"
         >
           <div className="grid lg:grid-cols-5 gap-12 items-center">
 
             {/* IMAGE */}
             <div className="lg:col-span-2 flex justify-center">
               <div className="relative group">
-                {/* Rings */}
-                <div className="absolute -inset-3 rounded-full border border-primary/20" />
+                <div className="absolute -inset-3 rounded-full border border-primary/20 transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute -inset-6 rounded-full border border-primary/10" />
 
                 <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-2 border-primary/30 relative z-10">
-                  <img
-                    src={t.image_url}
-                    alt={t.name}
-                    draggable={false}
-                    className={cn(
-                      'w-full h-full object-cover transition-all ease-out group-hover:scale-105',
-                      isAnimating ? 'opacity-0' : 'opacity-100'
-                    )}
-                    style={{ transitionDuration: `${ANIMATION_DURATION}ms` }}
-                  />
+                  <AnimatePresence mode="wait" custom={direction}>
+                    <motion.img
+                      key={t.id}
+                      src={t.image_url}
+                      alt={t.name}
+                      draggable={false}
+                      custom={direction}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{ duration: 0.5, ease: EASE }}
+                      className="w-full h-full object-cover"
+                    />
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
 
             {/* TEXT */}
             <div className="lg:col-span-3 relative">
-              <Quote className="absolute -top-6 -left-4 w-12 h-12 text-primary/20" />
+              <Quote className="absolute -top-6 -left-4 w-12 h-12 text-primary/15" />
 
-              <blockquote
-                className={cn(
-                  'font-serif text-xl md:text-2xl lg:text-3xl italic leading-relaxed transition-all ease-out',
-                  isAnimating
-                    ? 'opacity-0 translate-x-4'
-                    : 'opacity-100 translate-x-0'
-                )}
-                style={{ transitionDuration: `${ANIMATION_DURATION}ms` }}
-              >
-                “{t.quote}”
-              </blockquote>
+              <AnimatePresence mode="wait" custom={direction}>
+                <motion.div
+                  key={t.id}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.5, ease: EASE }}
+                >
+                  <blockquote className="font-serif text-xl md:text-2xl lg:text-3xl italic leading-relaxed text-foreground/90">
+                    "{t.quote}"
+                  </blockquote>
 
-              <div
-                className={cn(
-                  'mt-8 transition-opacity',
-                  isAnimating ? 'opacity-0' : 'opacity-100'
-                )}
-                style={{ transitionDuration: `${ANIMATION_DURATION}ms` }}
-              >
-                <p className="text-primary font-medium tracking-wide">
-                  {t.name}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {t.event}
-                </p>
-              </div>
+                  <div className="mt-8">
+                    <p className="text-primary font-medium tracking-wide">
+                      {t.name}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t.event}
+                    </p>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
 
           {/* NAV */}
-          <div className="flex items-center justify-center gap-6 mt-12">
-            <button onClick={prevSlide} className="p-3 border border-border/50">
+          <div className="flex items-center justify-center gap-6 mt-16">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={prevSlide}
+              className="p-3 border border-border/50 hover:border-primary/50 transition-colors duration-300"
+            >
               <ChevronLeft className="w-5 h-5" />
-            </button>
+            </motion.button>
 
-            {/* DOTS */}
             <div className="flex gap-3">
               {testimonials.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => goToSlide(i)}
                   className={cn(
-                    'h-2 rounded-full transition-all duration-300',
+                    'h-2 rounded-full transition-all duration-500',
                     i === currentIndex
-                      ? 'bg-primary w-6'
+                      ? 'bg-primary w-8'
                       : 'bg-muted-foreground/30 w-2 hover:bg-muted-foreground/60'
                   )}
                 />
               ))}
             </div>
 
-            <button onClick={nextSlide} className="p-3 border border-border/50">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={nextSlide}
+              className="p-3 border border-border/50 hover:border-primary/50 transition-colors duration-300"
+            >
               <ChevronRight className="w-5 h-5" />
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
