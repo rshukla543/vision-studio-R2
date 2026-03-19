@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { Loader2, Type, Sparkles, Package, DollarSign, Check, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Save, Loader2, Package } from "lucide-react";
+import { useAdminToast } from "@/components/admin/AdminToast";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 
@@ -26,7 +27,8 @@ const cardVariants: Variants = {
   },
 };
 
-export default function ServicesAdmin() {
+export default function ServiceAdmin() {
+  const { showToast } = useAdminToast();
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -60,7 +62,7 @@ export default function ServicesAdmin() {
       )
     );
     setSaving(false);
-    alert("All services updated");
+    showToast("Services updated successfully");
   };
 
   if (loading) {

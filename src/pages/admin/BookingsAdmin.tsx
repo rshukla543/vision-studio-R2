@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { BookingsCalendar } from "./BookingsCalendar";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, Mail, Phone, Clock, User, Camera, CalendarIcon } from "lucide-react";
+import { Check, X, Mail, Phone, Clock, User, Camera, CalendarIcon, Calendar } from "lucide-react";
 import { format } from "date-fns";
-import { toast } from "@/hooks/use-toast";
+import { useAdminToast } from "@/components/admin/AdminToast";
+import { AdminSectionHeader } from "@/components/admin/SectionHeader";
+import { AdminSectionCard } from "@/components/admin/SectionCard";
+import { AdminButton } from "@/components/admin/AdminButton";
 
 export default function BookingsAdmin() {
+  const { showToast } = useAdminToast();
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   // const [selectedDate, setSelectedDate] = useState<string | null>(new Date().toISOString().split('T')[0]);
@@ -53,8 +57,8 @@ export default function BookingsAdmin() {
     });
 
     if (!error) {
-      fetchBookings(); // Refresh the list and calendar dots
-      toast({ title: "Date Blocked", description: `${selectedDate} is now unavailable.` });
+      fetchBookings();
+      showToast(`${selectedDate} is now unavailable`, "info");
     }
   };
 
@@ -67,10 +71,10 @@ export default function BookingsAdmin() {
       .eq("id", id);
 
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      showToast(error.message, "error");
     } else {
-      toast({ title: "Success", description: "Booking/Block removed." });
-      fetchBookings(); // Refresh the list and calendar
+      showToast("Booking/Block removed");
+      fetchBookings();
     }
   };
 

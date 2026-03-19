@@ -1,13 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { Save, Loader2, Type, Hash, ImagePlus } from "lucide-react";
-
-import {
-  processImage,
-  uploadProcessedImage,
-} from "@/lib/imageProcessing";
+import { Save, Loader2, Type, Hash, ImagePlus, Sparkles } from "lucide-react";
+import { processImage, uploadProcessedImage } from "@/lib/imageProcessing";
 import { cn } from "@/lib/utils";
+import { useAdminToast } from "@/components/admin/AdminToast";
 
 /* ----------------------------------------
    Types
@@ -30,6 +27,7 @@ type SignatureStyle = {
 };
 
 export default function SignatureStyleAdmin() {
+  const { showToast } = useAdminToast();
   const [data, setData] = useState<SignatureStyle | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -93,7 +91,8 @@ export default function SignatureStyleAdmin() {
         image_preview_url: publicUrl,
       });
     } catch (err: any) {
-      alert(err.message || "Image upload failed");
+      console.error(err);
+      showToast(err.message || "Upload failed", "error");
     } finally {
       setUploading(false);
     }
@@ -105,13 +104,31 @@ export default function SignatureStyleAdmin() {
     if (!data) return;
     setSaving(true);
 
+    const updates = {
+      title_line_1: data.title_line_1,
+      title_highlight: data.title_highlight,
+      description_1: data.description_1,
+      description_2: data.description_2,
+      stat_1_value: data.stat_1_value,
+      stat_1_label: data.stat_1_label,
+      stat_2_value: data.stat_2_value,
+      stat_2_label: data.stat_2_label,
+      stat_3_value: data.stat_3_value,
+      stat_3_label: data.stat_3_label,
+      image_url: data.image_url,
+      image_preview_url: data.image_preview_url,
+    };
+
     const { error } = await supabase
       .from("signature_style")
-      .update(data)
+      .update(updates)
       .eq("id", data.id);
 
-    if (error) alert("Update failed: " + error.message);
-    else alert("Signature Style Updated");
+    if (error) {
+      showToast("Update failed: " + error.message, "error");
+    } else {
+      showToast("Signature style updated successfully");
+    }
 
     setSaving(false);
   };

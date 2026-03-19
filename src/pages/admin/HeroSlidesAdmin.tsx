@@ -8,9 +8,14 @@ import {
   Edit2,
   Trash2,
   Image as ImageIcon,
+  Film,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { uploadImageWithVariants } from "@/lib/imageUploadService";
+import { AdminSectionHeader } from "@/components/admin/SectionHeader";
+import { AdminSectionCard } from "@/components/admin/SectionCard";
+import { AdminButton } from "@/components/admin/AdminButton";
+import { useAdminToast } from "@/components/admin/AdminToast";
 
 /* ---------------- TYPES ---------------- */
 type HeroSlide = {
@@ -26,6 +31,7 @@ type HeroSlide = {
 const easeOutExpo: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function HeroSlidesAdmin() {
+  const { showToast } = useAdminToast();
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
@@ -34,7 +40,6 @@ export default function HeroSlidesAdmin() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   /* ---------------- DATA ---------------- */
   const fetchSlides = async () => {
@@ -108,10 +113,10 @@ export default function HeroSlidesAdmin() {
 
       resetForm();
       fetchSlides();
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2200);
+      showToast(editingId ? "Slide updated successfully" : "New slide added to sequence");
     } catch (err) {
       console.error(err);
+      showToast("Failed to save slide", "error");
     } finally {
       setIsUploading(false);
     }
@@ -119,8 +124,13 @@ export default function HeroSlidesAdmin() {
 
   const deleteSlide = async (id: string) => {
     if (!confirm("Are you sure? This will remove the slide from the hero sequence.")) return;
-    await supabase.from("hero_slides").delete().eq("id", id);
-    fetchSlides();
+    try {
+      await supabase.from("hero_slides").delete().eq("id", id);
+      showToast("Slide removed from sequence");
+      fetchSlides();
+    } catch (err) {
+      showToast("Failed to delete slide", "error");
+    }
   };
 
   return (
@@ -136,94 +146,119 @@ export default function HeroSlidesAdmin() {
       {/* ---------- FORM ---------- */}
       <motion.div
         layout
-        className="bg-[#0A0A0A] border border-white/5 p-10 rounded-[40px] mb-20 backdrop-blur-2xl relative shadow-2xl"
+        className="relative overflow-hidden mb-20"
       >
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        {/* Background layers */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] via-white/[0.03] to-white/[0.06] rounded-[40px]" />
+        <div className="absolute inset-0 backdrop-blur-2xl rounded-[40px]" />
+        <div className="absolute inset-0 border border-white/10 rounded-[40px]" />
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Inputs */}
-          <div className="lg:col-span-7 space-y-8">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="flex flex-col gap-2">
-                <label className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-bold ml-1">Title</label>
-                <input
-                  className="bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-primary/50 outline-none transition-all placeholder:text-white/10"
-                  placeholder="The Grand Opening"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-bold ml-1">Subtitle</label>
-                <input
-                  className="bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-primary/50 outline-none transition-all placeholder:text-white/10"
-                  placeholder="Luxury Wedding Photography"
-                  value={subtitle}
-                  onChange={(e) => setSubtitle(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-bold ml-1">Narrative Description</label>
-              <textarea
-                className="bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-primary/50 outline-none h-32 resize-none transition-all placeholder:text-white/10"
-                placeholder="Describe the mood and visual style..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Media Preview */}
-          <div className="lg:col-span-5 flex flex-col gap-2">
-            <label className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-bold ml-1">Media Canvas</label>
-            <div className="relative group aspect-video lg:h-full">
-              {previewUrl ? (
-                <div className="relative h-full w-full rounded-3xl overflow-hidden border border-white/10 shadow-inner">
-                  <img src={previewUrl} className="w-full h-full object-cover" alt="Preview" />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-sm">
-                    <label
-                      htmlFor="hero-upload"
-                      className="cursor-pointer bg-white text-black px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-transform"
-                    >
-                      <RotateCcw size={14} /> Replace
-                    </label>
-                  </div>
-                </div>
-              ) : (
-                <label
-                  htmlFor="hero-upload"
-                  className="flex flex-col items-center justify-center gap-4 h-full rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] text-white/20 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all duration-500 cursor-pointer group"
-                >
-                  <div className="p-4 rounded-full bg-white/5 group-hover:scale-110 transition-transform">
-                    <Upload size={24} />
-                  </div>
-                  <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Upload Master Asset</span>
-                </label>
-              )}
-              <input type="file" id="hero-upload" className="hidden" accept="image/*" onChange={handleImageChange} />
-            </div>
-          </div>
+        {/* Glow effect */}
+        <div className="absolute -top-32 -right-32 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
+        
+        {/* Top accent line */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-px">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+          <div className="absolute inset-0 blur-sm bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
         </div>
 
-        <div className="flex items-center gap-6 mt-12 pt-8 border-t border-white/5">
-          <button
-            onClick={saveSlide}
-            disabled={!previewUrl || !title || isUploading}
-            className="group relative flex items-center justify-center gap-3 px-10 py-4 bg-primary text-black font-bold uppercase tracking-[0.2em] text-[10px] rounded-full hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] disabled:opacity-20 transition-all"
-          >
-            {isUploading ? "Uploading..." : editingId ? <><Check size={14} /> Commit Changes</> : <><Plus size={14} /> Add to Sequence</>}
-          </button>
+        <div className="relative p-10">
+          {/* Form header badge */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
+              <Film size={12} className="text-primary" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                {editingId ? "Editing Mode" : "Create New Slide"}
+              </span>
+            </div>
+          </div>
+        
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            {/* Inputs */}
+            <div className="lg:col-span-7 space-y-8">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-white/50 font-bold ml-1">Title</label>
+                  <input
+                    className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-primary/50 focus:bg-white/[0.08] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] outline-none transition-all placeholder:text-white/20"
+                    placeholder="The Grand Opening"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-white/50 font-bold ml-1">Subtitle</label>
+                  <input
+                    className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-primary/50 focus:bg-white/[0.08] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] outline-none transition-all placeholder:text-white/20"
+                    placeholder="Luxury Wedding Photography"
+                    value={subtitle}
+                    onChange={(e) => setSubtitle(e.target.value)}
+                  />
+                </div>
+              </div>
 
-          {editingId && (
+              <div className="flex flex-col gap-2">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-white/50 font-bold ml-1">Narrative Description</label>
+                <textarea
+                  className="bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-primary/50 focus:bg-white/[0.08] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] outline-none h-32 resize-none transition-all placeholder:text-white/20"
+                  placeholder="Describe the mood and visual style..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Media Preview */}
+            <div className="lg:col-span-5 flex flex-col gap-2">
+              <label className="text-[9px] uppercase tracking-[0.2em] text-white/50 font-bold ml-1">Media Canvas</label>
+              <div className="relative group aspect-video lg:h-full">
+                {previewUrl ? (
+                  <div className="relative h-full w-full rounded-3xl overflow-hidden border border-white/10 shadow-inner">
+                    <img src={previewUrl} className="w-full h-full object-cover" alt="Preview" />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-sm">
+                      <label
+                        htmlFor="hero-upload"
+                        className="cursor-pointer bg-white text-black px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-transform"
+                      >
+                        <RotateCcw size={14} /> Replace
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <label
+                    htmlFor="hero-upload"
+                    className="flex flex-col items-center justify-center gap-4 h-full rounded-3xl border-2 border-dashed border-white/10 bg-white/[0.04] text-white/30 hover:border-primary/50 hover:bg-primary/[0.08] hover:text-primary transition-all duration-500 cursor-pointer group"
+                  >
+                    <div className="p-4 rounded-full bg-white/[0.08] group-hover:scale-110 group-hover:bg-primary/20 transition-all">
+                      <Upload size={24} />
+                    </div>
+                    <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Upload Master Asset</span>
+                  </label>
+                )}
+                <input type="file" id="hero-upload" className="hidden" accept="image/*" onChange={handleImageChange} />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6 mt-12 pt-8 border-t border-white/10">
             <button
-              onClick={resetForm}
-              className="text-white/30 hover:text-white transition-colors text-[10px] uppercase tracking-[0.2em] font-bold"
+              onClick={saveSlide}
+              disabled={!previewUrl || !title || isUploading}
+              className="group relative flex items-center justify-center gap-3 px-10 py-4 bg-gradient-to-r from-primary to-amber-500 text-black font-bold uppercase tracking-[0.2em] text-[10px] rounded-full hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] disabled:opacity-20 disabled:hover:shadow-none transition-all"
             >
-              Discard Edits
+              {isUploading ? "Uploading..." : editingId ? <><Check size={14} /> Commit Changes</> : <><Plus size={14} /> Add to Sequence</>}
             </button>
-          )}
+
+            {editingId && (
+              <button
+                onClick={resetForm}
+                className="text-white/40 hover:text-white hover:bg-white/5 px-4 py-2 rounded-full transition-all text-[10px] uppercase tracking-[0.2em] font-bold"
+              >
+                Discard Edits
+              </button>
+            )}
+          </div>
         </div>
       </motion.div>
 
@@ -278,29 +313,6 @@ export default function HeroSlidesAdmin() {
           ))}
         </AnimatePresence>
       </div>
-
-      {/* ---------- SUCCESS POPUP ---------- */}
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="fixed bottom-10 right-10 z-[100]"
-          >
-            <div className="px-8 py-5 rounded-2xl bg-white text-black shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-4 border border-white/20">
-              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white">
-                <Check size={16} />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest font-black">Success</p>
-                <p className="text-[11px] text-black/60">Cinema sequence updated</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   );
 }
-

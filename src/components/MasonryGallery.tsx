@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { LightboxWrapper } from './Lightbox';
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 
 const categories = ['All', 'Wedding', 'Pre-Wedding', 'Candid', 'Newborn'];
 
@@ -36,6 +37,7 @@ function ImageWithPreview({
       src={src}
       alt={alt}
       draggable={draggable}
+      onContextMenu={(e) => e.preventDefault()}
       loading="lazy"
       decoding="async"
       className={className}
@@ -66,7 +68,16 @@ const GallerySkeleton = () => (
 export function MasonryGallery({ showFeatured = true }: { showFeatured?: boolean }) {
   const [galleryItems, setGalleryItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState('All');
+
+  // Read category from URL on mount
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('category');
+    if (categoryFromUrl && categories.includes(categoryFromUrl)) {
+      setActiveCategory(categoryFromUrl);
+    }
+  }, [searchParams]);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);

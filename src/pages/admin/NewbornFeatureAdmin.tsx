@@ -1,19 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
-import {
-  Upload,
-  RotateCcw,
-  Save,
-  Loader2,
-  Type,
-  Image as ImageIcon,
-} from "lucide-react";
+import { Upload, RotateCcw, Save, Loader2, Type, Image as ImageIcon, Baby } from "lucide-react";
 import { motion } from "framer-motion";
-
-import {
-  processImage,
-  uploadProcessedImage,
-} from "@/lib/imageProcessing";
+import { processImage, uploadProcessedImage } from "@/lib/imageProcessing";
+import { useAdminToast } from "@/components/admin/AdminToast";
 
 /* ----------------------------------------
    Types
@@ -31,6 +21,7 @@ type NewbornFeature = {
 };
 
 export default function NewbornFeatureAdmin() {
+  const { showToast } = useAdminToast();
   const [data, setData] = useState<NewbornFeature | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

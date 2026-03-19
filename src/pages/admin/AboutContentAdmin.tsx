@@ -1,19 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import {
-  Loader2,
-  CheckCircle,
-  Image as ImageIcon,
-  Type,
-  Quote,
-  PencilLine,
-} from "lucide-react";
-
-import {
-  processImage,
-  uploadProcessedImage,
-} from "@/lib/imageProcessing";
+import { Loader2, CheckCircle, Image as ImageIcon, Type, Quote, PencilLine, User } from "lucide-react";
+import { processImage, uploadProcessedImage } from "@/lib/imageProcessing";
+import { useAdminToast } from "@/components/admin/AdminToast";
 
 type AboutContent = {
   id: string;
@@ -38,6 +28,7 @@ type AboutContent = {
 };
 
 export default function AboutContentAdmin() {
+  const { showToast } = useAdminToast();
   const [content, setContent] = useState<AboutContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

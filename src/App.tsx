@@ -11,12 +11,12 @@ import Contact from "./pages/Contact";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminLogin from "./pages/admin/AdminLogin";
 import NotFound from "./pages/NotFound";
-import { useEffect } from "react";
-
+import { useImageProtection } from "@/hooks/useImageProtection";
 
 const queryClient = new QueryClient();
 
 const App = () => {
+  useImageProtection();
 
   return (
   <QueryClientProvider client={queryClient}>

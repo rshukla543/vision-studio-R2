@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Loader2, Type, Sparkles } from "lucide-react";
+import { Loader2, Type, Sparkles, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAdminToast } from "@/components/admin/AdminToast";
+import { AdminSectionHeader } from "@/components/admin/SectionHeader";
+import { AdminSectionCard } from "@/components/admin/SectionCard";
+import { AdminButton } from "@/components/admin/AdminButton";
 
 type WeddingThemesContent = {
   id: string;
@@ -21,6 +25,7 @@ type WeddingThemesContent = {
 };
 
 export default function WeddingThemesAdmin() {
+  const { showToast } = useAdminToast();
   const [content, setContent] = useState<WeddingThemesContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -71,7 +76,7 @@ export default function WeddingThemesAdmin() {
       .update(content)
       .eq("singleton_key", 1);
     setSaving(false);
-    alert("Wedding Themes content updated successfully!");
+    showToast("Wedding Themes content updated successfully");
   };
 
   if (loading || !content) {

@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Trash2, Edit3, Star, X, Check, Loader2, Upload, Image as ImageIcon, Plus } from 'lucide-react';
+import { Trash2, Edit3, Star, X, Check, Loader2, Upload, Image as ImageIcon, Plus, Images } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
+import { motion } from 'framer-motion';
 import { uploadImageWithVariants } from "@/lib/imageUploadService";
+import { useAdminToast } from "@/components/admin/AdminToast";
+import { AdminButton } from "@/components/admin/AdminButton";
 
 export default function GalleryAdmin() {
+  const { showToast } = useAdminToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -34,7 +37,10 @@ export default function GalleryAdmin() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newItem.image) return alert("Please select an image");
+    if (!newItem.image) {
+      showToast("Please select an image", "error");
+      return;
+    }
 
     setUploading(true);
     try {
@@ -59,9 +65,9 @@ export default function GalleryAdmin() {
 
       setNewItem({ title: '', category: 'Wedding', aspect_ratio: 'normal', image: null });
       fetchGallery();
-      alert("Image uploaded successfully!");
+      showToast("Image uploaded successfully");
     } catch (error: any) {
-      alert(error.message);
+      showToast(error.message, "error");
     } finally {
       setUploading(false);
     }

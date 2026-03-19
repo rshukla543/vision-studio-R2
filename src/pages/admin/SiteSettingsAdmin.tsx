@@ -12,9 +12,11 @@ import {
   Facebook,
   Upload,
   Image as ImageIcon,
-  X
+  X,
+  Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAdminToast } from "@/components/admin/AdminToast";
 
 type SiteSettings = {
   id: string;
@@ -31,6 +33,7 @@ type SiteSettings = {
 };
 
 export default function SiteSettingsAdmin() {
+  const { showToast } = useAdminToast();
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -87,7 +90,7 @@ export default function SiteSettingsAdmin() {
         .eq("id", settings.id);
       
       if (error) throw error;
-      alert("Brand identity and settings updated!");
+      showToast("Site settings updated successfully");
       fetchSettings();
       setLogoFile(null);
     } catch (error) {

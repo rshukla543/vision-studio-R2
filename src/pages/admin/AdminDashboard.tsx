@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { motion, Variants } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 
 import HeroSlidesAdmin from "./HeroSlidesAdmin";
 
@@ -18,7 +18,7 @@ const BookingsAdmin = lazy(() => import("./BookingsAdmin"));
 const revealVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 20, // Reduced from 40 to 20 to make the initial "jump" less aggressive
+    y: 20,
     filter: "blur(8px)"
   },
   visible: {
@@ -27,15 +27,38 @@ const revealVariants: Variants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.8,
-      ease: [0.16, 1, 0.3, 1] // Snappier premium ease
+      ease: [0.16, 1, 0.3, 1]
     }
   }
 };
 
+// Section divider component
+function SectionDivider() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scaleX: 0 }}
+      whileInView={{ opacity: 1, scaleX: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      className="py-8 flex items-center justify-center"
+    >
+      <div className="h-px w-32 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        className="mx-4"
+      >
+        <Sparkles className="w-4 h-4 text-primary/40" />
+      </motion.div>
+      <div className="h-px w-32 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+    </motion.div>
+  );
+}
+
 export default function AdminDashboard() {
   return (
-    // layoutRoot helps Framer sync all nested animations
-    <motion.div layoutRoot className="space-y-16 md:space-y-24 lg:space-y-32">
+    <motion.div layoutRoot className="space-y-8 md:space-y-12">
+      {/* Dashboard Header */}
       <motion.header
         initial="hidden"
         whileInView="visible"
@@ -43,73 +66,99 @@ export default function AdminDashboard() {
         variants={revealVariants}
         className="max-w-3xl"
       >
-        <span className="text-xs tracking-[0.4em] uppercase text-primary font-semibold border-l-2 border-primary pl-4">
-          Control Center
-        </span>
-        <h2 className="text-5xl md:text-7xl font-serif mt-6 text-white leading-[1.1] tracking-tight">
-          System <span className="italic opacity-30 font-light underline decoration-primary/20 underline-offset-8">Interface</span>
+        <motion.div 
+          className="flex items-center gap-3 mb-6"
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1, duration: 0.6 }}
+        >
+          <motion.div
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Sparkles className="w-5 h-5 text-primary" />
+          </motion.div>
+          <span className="text-xs tracking-[0.4em] uppercase text-primary font-semibold">
+            Control Center
+          </span>
+        </motion.div>
+        
+        <h2 className="text-5xl md:text-7xl font-serif text-white leading-[1.1] tracking-tight">
+          System <span className="italic text-primary/70">Interface</span>
         </h2>
         <p className="text-muted-foreground mt-6 text-base tracking-wide max-w-lg leading-relaxed opacity-70">
-          Manage your portfolio’s visual narrative. Changes are synchronized to the global CDN instantly.
+          Manage your portfolio's visual narrative. Changes are synchronized to the global CDN instantly.
         </p>
       </motion.header>
-      {/* SECTION 1: Direct Load to prevent stutter */}
+
+      <SectionDivider />
+
+      {/* SECTION 1: Hero Slides - Direct Load */}
       <motion.section
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }} // Triggers slightly before it hits view
+        viewport={{ once: true, margin: "-100px" }}
         variants={revealVariants}
       >
         <HeroSlidesAdmin />
       </motion.section>
 
+      <SectionDivider />
+
       {/* REMAINING SECTIONS: Lazy Loaded */}
       <Suspense fallback={<SectionSkeleton />}>
-
         <AnimatedSection>
           <BookingsAdmin />
         </AnimatedSection>
+
+        <SectionDivider />
 
         <AnimatedSection>
           <GalleryAdmin />
         </AnimatedSection>
 
+        <SectionDivider />
+
         <AnimatedSection>
           <WeddingThemesAdmin />
         </AnimatedSection>
+
+        <SectionDivider />
 
         <AnimatedSection>
           <SignatureStyleAdmin />
         </AnimatedSection>
 
+        <SectionDivider />
+
         <AnimatedSection>
           <NewbornFeatureAdmin />
         </AnimatedSection>
+
+        <SectionDivider />
 
         <AnimatedSection>
           <AboutContentAdmin />
         </AnimatedSection>
 
+        <SectionDivider />
+
         <AnimatedSection>
           <TestimonialsAdmin />
         </AnimatedSection>
+
+        <SectionDivider />
 
         <AnimatedSection>
           <ServiceAdmin />
         </AnimatedSection>
 
+        <SectionDivider />
 
         <AnimatedSection>
           <SiteSettingsAdmin />
         </AnimatedSection>
-
-
-
-
-
-
-
-
       </Suspense>
 
       <div className="pb-32" />
@@ -120,7 +169,7 @@ export default function AdminDashboard() {
 function AnimatedSection({ children }: { children: React.ReactNode }) {
   return (
     <motion.section
-      layout // 2. FIX: Handle layout shifts automatically
+      layout
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.05, margin: "-50px" }}
