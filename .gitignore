@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Env files
+.env
+
+# Editor / IDE
+.vscode/
+
+# Local project junk
+project-context/
+_backups/
+
+# Assets you don't want tracked
+*.psd
+*.zip
+sdis.png
+
+# OS files
+.DS_Store
+Thumbs.db
